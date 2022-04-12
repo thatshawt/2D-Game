@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/COP2800 gui projects.iml" filepath="$PROJECT_DIR$/COP2800 gui projects.iml" />
+      <module fileurl="file://$PROJECT_DIR$/GameClient/GameClient.iml" filepath="$PROJECT_DIR$/GameClient/GameClient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/GameCore/GameCore.iml" filepath="$PROJECT_DIR$/GameCore/GameCore.iml" />
+      <module fileurl="file://$PROJECT_DIR$/GameServer/GameServer.iml" filepath="$PROJECT_DIR$/GameServer/GameServer.iml" />
+    </modules>
+  </component>
+</project>
