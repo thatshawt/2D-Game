@@ -409,10 +409,16 @@ public class GameClient extends JPanel implements Runnable {
 
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
+        String ip = "127.0.0.1";
+        int port = 1337;
+
+        if(args.length > 0){
+            ip = args[0];
+            port = Integer.parseInt(args[1]);
+        }
+
         try {
-            gameClient.serverConnection = new Socket("127.0.0.1", 1337);
-
-
+            gameClient.serverConnection = new Socket(ip, port);
 
             //only let user type input after they connect to server
             //so janky but whatever im in a hurry
