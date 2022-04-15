@@ -10,6 +10,7 @@ Also, if you have a ps4 controller you can use the arrow keys to move.
 
 ## Client Usage:
 First argument is ip you want to connect to, second is the port.
+If you don't specify arguments it will connect to my server.
 
 ```java -jar GameClient.jar 123.456.789.123 25565```
 
