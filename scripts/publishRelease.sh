@@ -5,7 +5,7 @@
 #export GITHUB_API=https://git.{your domain}.com/api/v3 # needed only for enterprise
 export GITHUB_ORGANIZATION=thatshawt
 export GITHUB_REPO=2D-Game
-export VERSION_NAME=${BUILD_NUMBER}
+export VERSION_NAME=release${BUILD_NUMBER}
 
 echo "Deleting release from github before creating new one"
 linux-amd64-github-release delete --user ${GITHUB_ORGANIZATION} --repo ${GITHUB_REPO} --tag "${VERSION_NAME}"
