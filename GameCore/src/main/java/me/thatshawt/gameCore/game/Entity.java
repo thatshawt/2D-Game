@@ -2,11 +2,13 @@ package me.thatshawt.gameCore.game;
 
 import me.thatshawt.gameCore.tile.Tile;
 
+import java.io.Serializable;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class Entity {
+public abstract class Entity implements Serializable {
 
+    private static final long serialVersionUID = -4391882970385321938L;
     public final UUID uuid;
     protected AtomicInteger x,y;
     protected Tile tile;

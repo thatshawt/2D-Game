@@ -1,22 +1,18 @@
 package me.thatshawt.gameServer;
 
-import me.thatshawt.gameCore.game.Entity;
-import me.thatshawt.gameCore.game.Player;
 import me.thatshawt.gameCore.packets.GamePacket;
 import me.thatshawt.gameCore.packets.ServerPacket;
 import me.thatshawt.gameCore.tile.GameMap;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 public class GameServer{
 
-    private ServerSocket serverSocket;
+    private final ServerSocket serverSocket;
     //make it synchronized cus i access it from main thread and clientThread thread
     protected List<ServerPlayerHandler> players = Collections.synchronizedList(new ArrayList<>());
     protected GameMap map;
@@ -64,10 +60,12 @@ public class GameServer{
 
     public static void main(String[] args) {
         try {
-            int port = 1337;
+            int port = 25565;
             if(args.length > 0)port = Integer.parseInt(args[0]);//you can put ur own port if you want
 
-            GameServer server = new GameServer();
+            System.out.println("listening on" + port);
+
+            GameServer server = new GameServer(port);
         } catch (IOException e) {
             e.printStackTrace();
         }

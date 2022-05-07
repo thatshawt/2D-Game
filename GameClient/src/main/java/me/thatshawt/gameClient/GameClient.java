@@ -398,19 +398,22 @@ public class GameClient extends JPanel implements Runnable {
         sendPacket(packet, new byte[]{});
     }
 
-    public static void main(String[] args) {
+    public static void testRun(String[] args, boolean debug){
         JFrame frame = new JFrame();
         GameClient gameClient = new GameClient();
 
         frame.add(gameClient);
 
-        frame.setLocation(2300,350);//position i used to make debugging quicker
+        frame.setLocation(2300,350); //position i used to make debugging quicker
         frame.setSize(650, 650);
 
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        String ip = "127.0.0.1";
-        int port = 1337;
+        String ip;
+        if(debug) ip = "127.0.0.1";
+        else ip = "45.77.121.201";
+
+        int port = 25565;
 
         if(args.length > 0){
             ip = args[0];
@@ -427,6 +430,11 @@ public class GameClient extends JPanel implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+    }
+
+    public static void main(String[] args) {
+        testRun(args, true);
     }
 
 }

@@ -2,8 +2,10 @@ package me.thatshawt.gameServer;
 
 import me.thatshawt.gameCore.game.Player;
 import me.thatshawt.gameCore.packets.ServerPacket;
+import me.thatshawt.gameCore.tile.GameMap;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.UUID;
@@ -19,6 +21,9 @@ public class ServerPlayer extends Player {
         this.server = server;
     }
 
+    /**
+     * tell entire server this player's position
+     */
     protected void broadcastPosition(){
         ByteBuffer buffer = ByteBuffer.allocate(8*2 + 4*2);
         buffer.putLong(uuid.getMostSignificantBits())
@@ -29,6 +34,10 @@ public class ServerPlayer extends Player {
         server.broadcastPacket(ServerPacket.ENTITY_POSITION, buffer.array());
     }
 
+    /**
+    Sends current player's position to another player
+     @param player the player to send the position to
+     */
     protected void sendPosition(ServerPlayer player) throws IOException {
         System.out.printf("sent probabky x: %d, y: %d\n", this.getX(), this.getY());
         ByteBuffer buffer = ByteBuffer.allocate(8*2 + 4*2);
@@ -38,6 +47,16 @@ public class ServerPlayer extends Player {
                 .putInt(this.getY());
 //        System.out.println("sent " + uuid);
         server.sendPacket(player, ServerPacket.ENTITY_POSITION, buffer.array());
+    }
+
+    public void sendMap(GameMap map){
+        ByteBuffer buffer = ByteBuffer.allocate(map.tiles.length*map.tiles[0].length);//crude estimate lmao
+        try {
+            map.putBytes(buffer);
+            server.sendPacket(this, ServerPacket.MAP_DATA, buffer.array());
+        } catch (IOException e) {
+            e.printStackTrace();//lmao
+        }
     }
 
     protected void sendPosition() throws IOException {

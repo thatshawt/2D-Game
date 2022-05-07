@@ -2,12 +2,15 @@ package me.thatshawt.gameCore.tile;
 
 import me.thatshawt.gameCore.game.Entity;
 
+import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class GameMap {
+public class GameMap implements Serializable {
 
+    private static final long serialVersionUID = -4761830387139310254L;
     public List<Entity> entityList = new ArrayList<>();
     public Tile[][] tiles;
 
@@ -56,5 +59,20 @@ public class GameMap {
         for(Entity entity : entityList)
             if(entity.uuid.equals(uuid))return true;
         return false;
+    }
+
+    public void putBytes(ByteBuffer buffer) throws IOException {
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        ObjectOutputStream out = new ObjectOutputStream(byteStream);
+        out.writeObject(this);
+        buffer.put(byteStream.toByteArray());
+        out.close();
+    }
+
+    public static GameMap fromBytes(InputStream inz) throws IOException, ClassNotFoundException {
+        ObjectInputStream in = new ObjectInputStream(inz);
+        GameMap map = (GameMap)in.readObject();
+        in.close();
+        return map;
     }
 }

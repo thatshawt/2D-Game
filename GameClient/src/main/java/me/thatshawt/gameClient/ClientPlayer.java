@@ -9,7 +9,8 @@ import java.util.UUID;
 
 public class ClientPlayer extends Player{
 
-    private final GameClient gameClient;
+    private static final long serialVersionUID = -8727067318966852110L;
+    private transient final GameClient gameClient;
 
     public ClientPlayer(GameClient gameClient, int x, int y, UUID uuid) {
         super(x, y, uuid);

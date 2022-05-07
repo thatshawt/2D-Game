@@ -7,8 +7,9 @@ import java.util.UUID;
 
 public abstract class Player extends Entity{
 
-    protected String chatMsg = "";
-    private long chatTime;
+    private static final long serialVersionUID = 2945172386414521018L;
+    protected transient String chatMsg = "";
+    private transient long chatTime;
 
     protected int renderDistance = 10;
 

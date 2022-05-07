@@ -1,6 +1,8 @@
 package me.thatshawt.gameCore.tile;
 
-public abstract class Tile {
+import java.io.Serializable;
+
+public abstract class Tile implements Serializable {
     public abstract char getChar();
 
 }
