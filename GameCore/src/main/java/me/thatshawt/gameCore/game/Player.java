@@ -2,16 +2,17 @@ package me.thatshawt.gameCore.game;
 
 import me.thatshawt.gameCore.tile.PlayerTile;
 
+import java.io.Serializable;
 import java.time.Clock;
 import java.util.UUID;
 
-public abstract class Player extends Entity{
+public abstract class Player extends Entity implements Serializable{
 
     private static final long serialVersionUID = 2945172386414521018L;
     protected transient String chatMsg = "";
     private transient long chatTime;
 
-    protected int renderDistance = 10;
+    protected transient int renderDistance = 10;
 
     public Player(int x, int y){
         super(x,y,new PlayerTile());
