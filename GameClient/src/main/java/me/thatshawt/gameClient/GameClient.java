@@ -16,9 +16,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.font.LineMetrics;
 import java.io.*;
 import java.net.Socket;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 //TODO: make the combat with arrows and you hit one tile range i guess
@@ -35,10 +37,12 @@ public class GameClient extends JPanel implements Runnable {
     protected Socket serverConnection;
     protected GameMap gameMap;
     protected ClientPlayer player;
+    protected Camera camera;
 
     private AtomicReference<Point> lastMouseLocation = new AtomicReference<>(new Point(0,0));
     private boolean chatting = false;
     private String chatMessage = "";
+    private AtomicBoolean debug = new AtomicBoolean(true);
 
     public GameClient(){
         gameMap = new GameMap();
@@ -94,6 +98,9 @@ public class GameClient extends JPanel implements Runnable {
                         case 'd':
                         case 'D':
                             player.moveRight();
+                            break;
+                        case '3':
+                            debug.set(!debug.get());
                             break;
                     }
                 }
@@ -239,11 +246,11 @@ public class GameClient extends JPanel implements Runnable {
             new Font(new JLabel().getFont().getName(), Font.PLAIN, 18);
 
     private int getBoxWidth(){
-        return this.getWidth() / player.getRenderDistance();
+        return this.getWidth() / player.getCamera().getRenderDistance();
     }
 
     private int getBoxHeight(){
-        return this.getHeight() / player.getRenderDistance();
+        return this.getHeight() / player.getCamera().getRenderDistance();
     }
 
     private Point tileToPixel(int tilex, int tiley){
@@ -301,8 +308,9 @@ public class GameClient extends JPanel implements Runnable {
             g.setColor(Color.white);
             g.drawString("loading i guess...", screenWidth/2, screenHeight/2);
         }else{
-            final int boxWidth = screenWidth / player.getRenderDistance();
-            final int boxHeight = screenHeight / player.getRenderDistance();
+            final Camera camera = player.getCamera();
+            final int boxWidth = screenWidth / camera.getRenderDistance();
+            final int boxHeight = screenHeight / camera.getRenderDistance();
 
             //clear screen
             g.setColor(Color.BLACK);
@@ -312,10 +320,10 @@ public class GameClient extends JPanel implements Runnable {
             //draw tiles
             g.setColor(Color.WHITE);
             g.setFont(CHAR_FONT);
-
-            final int HALF_RENDER_DISTANCE = (int)((float)player.getRenderDistance()/2.0f);
-            for(int i = -HALF_RENDER_DISTANCE; i < player.getRenderDistance(); i++){
-                for(int j = -HALF_RENDER_DISTANCE; j < player.getRenderDistance(); j++){
+//            final Camera camera = player.getCamera();
+            final int HALF_RENDER_DISTANCE = (int)((float)camera.getRenderDistance()/2.0f);
+            for(int i = -HALF_RENDER_DISTANCE; i < camera.getRenderDistance(); i++){
+                for(int j = -HALF_RENDER_DISTANCE; j < camera.getRenderDistance(); j++){
 //                System.out.printf("(x,y): %d, %d\n", player.getX(), player.getY());
 //                    char renderChar = getRenderCharAt(player.getX() + i - gameMap.tiles.length/2 - 1,
 //                            player.getY() + j - gameMap.tiles[0].length/2 - 1);
@@ -346,9 +354,9 @@ public class GameClient extends JPanel implements Runnable {
         if(player != null){
             final int screenWidth = this.getWidth();
             final int screenHeight = this.getHeight();
-
-            final int boxWidth = screenWidth / player.getRenderDistance();
-            final int boxHeight = screenHeight / player.getRenderDistance();
+            final Camera camera = player.getCamera();
+            final int boxWidth = screenWidth / camera.getRenderDistance();
+            final int boxHeight = screenHeight / camera.getRenderDistance();
 
             g.setColor(Color.LIGHT_GRAY);
             g.setFont(UI_FONT);
@@ -369,8 +377,19 @@ public class GameClient extends JPanel implements Runnable {
 //        g.drawString(String.format("(%d, %d)", tilePoint.x, tilePoint.y), point.x, point.y);
 
             if(chatting){
+                //lmao
                 g.drawString(chatMessage, 40, 40);
 //            System.out.println(chatMessage);
+            }
+
+            if(debug.get()){
+                String debugMsg = String.format("mouseTile:(%d,%d)",tilePoint.x,tilePoint.y);
+                FontMetrics fontMetrics = g.getFontMetrics(UI_FONT);
+                g.setColor(Color.RED);
+                final int height = fontMetrics.getHeight();
+                g.fillRect(5,30-height,fontMetrics.stringWidth(debugMsg)+5, height+10);
+                g.setColor(Color.white);
+                g.drawString(debugMsg, 5,30);
             }
         }
     }
