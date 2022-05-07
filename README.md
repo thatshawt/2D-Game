@@ -19,4 +19,7 @@ First argument is the port to listen on.
 
 ```java -jar GameServer.jar 25565```
 
+To make it easier I made a docker container for the server at https://github.com/thatshawt/2D-Game/pkgs/container/2d-game.
+Its always updated cus I linked it to the releases.
+
 ![image](https://user-images.githubusercontent.com/5741581/163100622-548dc582-d7d9-4c2a-ae3d-e048b0e6e10f.png)
