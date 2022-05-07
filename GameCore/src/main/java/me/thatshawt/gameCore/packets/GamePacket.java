@@ -11,10 +11,10 @@ public final class GamePacket {
     public static void sendPacket(int packetID, OutputStream output, byte[] data) throws IOException {
         DataOutputStream outputStream = new DataOutputStream(output);
 
-        // add 1 to include the packet id ( ordinal() )
-        outputStream.writeInt(data.length + 4);
-        outputStream.writeInt(packetID);
-        outputStream.write(data);
+        // add 4 bytes cus thats the packet id
+        outputStream.writeInt(data.length + 4); //packet length
+        outputStream.writeInt(packetID);          //packet id
+        outputStream.write(data);                 //packet data
     }
 
     public static void putUUID(UUID uuid, ByteArrayOutputStream buffer) throws IOException {
