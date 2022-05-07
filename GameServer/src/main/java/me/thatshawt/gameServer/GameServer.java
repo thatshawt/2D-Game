@@ -21,7 +21,7 @@ public class GameServer{
     public GameServer(int port) throws IOException {
         serverSocket = new ServerSocket(port);
 
-        map = new GameMap(4);
+        map = new GameMap(10);
 
         playerAcceptingThread = new Thread(() -> {
             while(true) {
