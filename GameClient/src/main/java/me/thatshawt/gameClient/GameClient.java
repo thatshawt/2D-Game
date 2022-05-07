@@ -269,9 +269,10 @@ public class GameClient extends JPanel implements Runnable {
     private Point pixelToTile(int screenx, int screeny){
         final int boxWidth = getBoxWidth();
         final int boxHeight = getBoxHeight();
+        final Camera camera =  player.getCamera();
 //        player.getX() + i - gameMap.tiles.length/2 - 1
-        int x = (screenx /*- (boxWidth/2)*/)/boxWidth  + (player.getX() - gameMap.tiles.length/2 - 1);
-        int y = (screeny /*- (boxHeight/2)*/)/boxHeight  + (player.getY() - gameMap.tiles[0].length/2 - 1);
+        int x = (screenx /*- (boxWidth/2)*/)/boxWidth  + (player.getX() - camera.getRenderDistance()/2 + 1);
+        int y = (screeny /*- (boxHeight/2)*/)/boxHeight  + (player.getY() - camera.getRenderDistance()/2 + 1);
         return new Point(x,y);
     }
 
@@ -373,7 +374,7 @@ public class GameClient extends JPanel implements Runnable {
             Point point = lastMouseLocation.get();
             Point tilePoint = pixelToTile(point);
 
-            g.drawString(String.valueOf(getRenderTileAt(tilePoint.x, tilePoint.y)), point.x, point.y);
+//            g.drawString(String.valueOf(getRenderTileAt(tilePoint.x, tilePoint.y)), point.x, point.y);
 //        g.drawString(String.format("(%d, %d)", tilePoint.x, tilePoint.y), point.x, point.y);
 
             if(chatting){
@@ -383,13 +384,22 @@ public class GameClient extends JPanel implements Runnable {
             }
 
             if(debug.get()){
-                String debugMsg = String.format("mouseTile:(%d,%d)",tilePoint.x,tilePoint.y);
+                String[] debugMsg = {
+                        String.format("mouseTileXY:(%d,%d)\n",tilePoint.x,tilePoint.y),
+                        String.format("mouseTile:%s",getRenderTileAt(tilePoint.x, tilePoint.y))
+                };
                 FontMetrics fontMetrics = g.getFontMetrics(UI_FONT);
-                g.setColor(Color.RED);
                 final int height = fontMetrics.getHeight();
-                g.fillRect(5,30-height,fontMetrics.stringWidth(debugMsg)+5, height+10);
-                g.setColor(Color.white);
-                g.drawString(debugMsg, 5,30);
+                for(int i=0;i<debugMsg.length;i++){
+                    String s = debugMsg[i];
+                    int x = 5;
+                    int y = 30;
+                    g.setColor(Color.RED);
+                    g.fillRect(x,y+height*(i-1),fontMetrics.stringWidth(s)+5, height+10);
+                    g.setColor(Color.white);
+                    g.drawString(s, x,y + height*i);
+                }
+
             }
         }
     }
