@@ -14,26 +14,34 @@ public class GameServer{
 
     private final ServerSocket serverSocket;
     //make it synchronized cus i access it from main thread and clientThread thread
+    private Thread playerAcceptingThread;
     protected List<ServerPlayerHandler> players = Collections.synchronizedList(new ArrayList<>());
     protected GameMap map;
 
     public GameServer(int port) throws IOException {
         serverSocket = new ServerSocket(port);
 
-        map = new GameMap();
+        map = new GameMap(4);
 
-        //continue doing this i guess
-        while(true) {
-            ServerPlayer player = new ServerPlayer(this, serverSocket.accept(), 0, 0);
+        playerAcceptingThread = new Thread(() -> {
+            while(true) {
 
-            ServerPlayerHandler serverPlayerHandler = new ServerPlayerHandler(this, player);
+                try {
+                    ServerPlayer player
+                            = new ServerPlayer(GameServer.this, serverSocket.accept(), 0, 0);
+                    ServerPlayerHandler serverPlayerHandler
+                            = new ServerPlayerHandler(GameServer.this, player);
 
-            players.add(serverPlayerHandler);
-        }
-    }
+                    players.add(serverPlayerHandler);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
-    public GameServer() throws IOException {
-        this(1337);
+
+            }
+        });
+
+        playerAcceptingThread.start();
     }
 
     public void sendPacket(ServerPlayer serverPlayer, ServerPacket packet, byte[] data) throws IOException {
