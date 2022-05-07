@@ -313,15 +313,16 @@ public class GameClient extends JPanel implements Runnable {
             g.setColor(Color.WHITE);
             g.setFont(CHAR_FONT);
 
-            for(int i = 0; i < player.getRenderDistance(); i++){
-                for(int j = 0; j < player.getRenderDistance(); j++){
+            final int HALF_RENDER_DISTANCE = (int)((float)player.getRenderDistance()/2.0f);
+            for(int i = -HALF_RENDER_DISTANCE; i < player.getRenderDistance(); i++){
+                for(int j = -HALF_RENDER_DISTANCE; j < player.getRenderDistance(); j++){
 //                System.out.printf("(x,y): %d, %d\n", player.getX(), player.getY());
 //                    char renderChar = getRenderCharAt(player.getX() + i - gameMap.tiles.length/2 - 1,
 //                            player.getY() + j - gameMap.tiles[0].length/2 - 1);
 
                     Point tileCoord = new Point(
-                            player.getX() + i - gameMap.tiles.length/2 - 1,
-                            player.getY() + j - gameMap.tiles[0].length/2 - 1
+                            player.getX() + i - HALF_RENDER_DISTANCE + 1,
+                            player.getY() + j - HALF_RENDER_DISTANCE + 1
                             );
                     Tile tile = getRenderTileAt(tileCoord.x, tileCoord.y);
                     char renderChar = '#';
