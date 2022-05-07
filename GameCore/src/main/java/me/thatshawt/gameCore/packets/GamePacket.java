@@ -1,9 +1,6 @@
 package me.thatshawt.gameCore.packets;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
@@ -20,9 +17,10 @@ public final class GamePacket {
         outputStream.write(data);
     }
 
-    public static ByteBuffer putUUID(UUID uuid, ByteBuffer buffer){
-        return buffer.putLong(uuid.getMostSignificantBits())
-                .putLong(uuid.getLeastSignificantBits());
+    public static void putUUID(UUID uuid, ByteArrayOutputStream buffer) throws IOException {
+        DataOutputStream out = new DataOutputStream(buffer);
+        out.writeLong(uuid.getMostSignificantBits());
+        out.writeLong(uuid.getLeastSignificantBits());
     }
 
     public static UUID readUUID(DataInputStream input) throws IOException {

@@ -198,6 +198,16 @@ public class GameClient extends JPanel implements Runnable {
                                     System.out.println("tried to remove nonexistent entity");
                                 }
                             }
+                            case MAP_DATA:{
+                                try {
+                                    GameMap map = GameMap.fromBytes(input);
+                                    System.out.println("received map data");
+                                    System.out.println(map);
+                                    this.gameMap = map;
+                                } catch (ClassNotFoundException e) {
+                                    e.printStackTrace();
+                                }
+                            }
                             default:
                                 break;
                         }
@@ -206,6 +216,9 @@ public class GameClient extends JPanel implements Runnable {
                     e.printStackTrace();
                     break;
                 }
+//                catch (ClassNotFoundException e) {
+//                    e.printStackTrace();
+//                }
 
             }
         });

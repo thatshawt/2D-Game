@@ -4,9 +4,7 @@ import me.thatshawt.gameCore.packets.ClientPacket;
 import me.thatshawt.gameCore.packets.GamePacket;
 import me.thatshawt.gameCore.packets.ServerPacket;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
@@ -30,28 +28,42 @@ public class ServerPlayerHandler extends Thread {
     public void run() {
         try {
             {
-                System.out.println();
-                UUID uuid = player.uuid;
-                ByteBuffer uuidBuffer = ByteBuffer.allocate(8 * 2);
-                GamePacket.putUUID(uuid, uuidBuffer);
-                server.sendPacket(player, ServerPacket.PLAYER_LOGIN_RESPONSE, uuidBuffer.array());
+                ByteArrayOutputStream mapBuffer = new ByteArrayOutputStream();
+                server.map.putBytes(mapBuffer);
+                try{
+                server.sendPacket(player, ServerPacket.MAP_DATA, mapBuffer.toByteArray());
+                }catch(Exception e){
+                    System.out.println("failed to send map data");
+                    e.printStackTrace();
+                }
+                System.out.println("sent map data");
 
-                server.broadcastPacket(ServerPacket.PLAYER_ENTITY_SPAWN, uuidBuffer.array());
+                UUID uuid = player.uuid;
+                ByteArrayOutputStream uuidBuffer = new ByteArrayOutputStream();
+                GamePacket.putUUID(uuid, uuidBuffer);
+                server.sendPacket(player, ServerPacket.PLAYER_LOGIN_RESPONSE, uuidBuffer.toByteArray());
+                System.out.println();
+
+                server.broadcastPacket(ServerPacket.PLAYER_ENTITY_SPAWN, uuidBuffer.toByteArray());
                 System.out.println(server.players);
                 for (ServerPlayerHandler otherServerPlayerHandler : server.players) {
                     uuid = otherServerPlayerHandler.getPlayer().uuid;
-                    uuidBuffer.clear();
+                    uuidBuffer.reset();
                     GamePacket.putUUID(uuid, uuidBuffer);
-                    server.sendPacket(player, ServerPacket.PLAYER_ENTITY_SPAWN, uuidBuffer.array());
+                    server.sendPacket(player, ServerPacket.PLAYER_ENTITY_SPAWN, uuidBuffer.toByteArray());
                     otherServerPlayerHandler.getPlayer().sendPosition(this.player);
-                    System.out.println("sent position for " + server);
+                    System.out.println("sent entity spawn to " + otherServerPlayerHandler.player);
                     player.broadcastPosition();
+                    System.out.println("broadcasted position of " + player);
                 }
             }
 
             DataInputStream input = new DataInputStream(new BufferedInputStream(player.socket.getInputStream()));
             while(true){
-
+                if(player.socket.isClosed()){
+                    System.out.println("dead on arrival");
+                    return;
+                }
                 int packetLength = input.readInt();
                 ClientPacket packet = ClientPacket.fromInt(input.readInt());
 
@@ -87,12 +99,11 @@ public class ServerPlayerHandler extends Thread {
                         byte[] message = new String(buffer).getBytes();
 //                        System.out.println("received '" + new String(message) + "', length: " + message.length);
 
-                        ByteBuffer uuidBuffer = ByteBuffer.allocate(8 + 8 + message.length);
-                        GamePacket
-                                .putUUID(uuid, uuidBuffer)
-                                .put(message);
+                        ByteArrayOutputStream messageBuffer = new ByteArrayOutputStream();
+                        GamePacket.putUUID(uuid, messageBuffer);
+                        messageBuffer.write(message);
 
-                        server.broadcastPacket(ServerPacket.PLAYER_CHAT, uuidBuffer.array());
+                        server.broadcastPacket(ServerPacket.PLAYER_CHAT, messageBuffer.toByteArray());
                         System.out.println("player " + uuid);
                         break;
                     }
@@ -101,10 +112,15 @@ public class ServerPlayerHandler extends Thread {
             }
         } catch (IOException ignored) {
             UUID uuid = player.uuid;
-            ByteBuffer buffer = ByteBuffer.allocate(8*2);
-            GamePacket.putUUID(uuid, buffer);
-            server.broadcastPacket(ServerPacket.ENTITY_REMOVE, buffer.array());
-
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            try {
+                GamePacket.putUUID(uuid, buffer);
+                server.broadcastPacket(ServerPacket.ENTITY_REMOVE, buffer.toByteArray());
+                System.out.println("sent entity remove");
+                ignored.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace(); //bruh imagine
+            }
             server.players.remove(this);
         }
 

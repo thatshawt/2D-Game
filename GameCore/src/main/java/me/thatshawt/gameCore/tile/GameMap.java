@@ -14,14 +14,18 @@ public class GameMap implements Serializable {
     public List<Entity> entityList = new ArrayList<>();
     public Tile[][] tiles;
 
-    public GameMap(){
-        tiles = new Tile[6][6];
+    public GameMap(int size){
+        tiles = new Tile[size][size];
 
         for(int i=0;i<tiles.length;i++){
             for(int j=0;j<tiles[i].length;j++){
                 tiles[i][j] = new AirTile();
             }
         }
+    }
+
+    public GameMap(){
+        this(4);//idk cool size i guess
     }
 
     public void addEntity(Entity entity){
@@ -61,18 +65,18 @@ public class GameMap implements Serializable {
         return false;
     }
 
-    public void putBytes(ByteBuffer buffer) throws IOException {
+    public void putBytes(ByteArrayOutputStream buffer) throws IOException {
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(byteStream);
         out.writeObject(this);
-        buffer.put(byteStream.toByteArray());
+        buffer.write(byteStream.toByteArray());
         out.close();
     }
 
     public static GameMap fromBytes(InputStream inz) throws IOException, ClassNotFoundException {
         ObjectInputStream in = new ObjectInputStream(inz);
         GameMap map = (GameMap)in.readObject();
-        in.close();
+//        in.close(); //this would close the socket stream and thats funny lmao and unintended
         return map;
     }
 }

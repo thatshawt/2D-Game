@@ -4,6 +4,7 @@ import me.thatshawt.gameCore.game.Player;
 import me.thatshawt.gameCore.packets.ServerPacket;
 import me.thatshawt.gameCore.tile.GameMap;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -50,10 +51,11 @@ public class ServerPlayer extends Player {
     }
 
     public void sendMap(GameMap map){
-        ByteBuffer buffer = ByteBuffer.allocate(map.tiles.length*map.tiles[0].length);//crude estimate lmao
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();//crude estimate lmao
         try {
             map.putBytes(buffer);
-            server.sendPacket(this, ServerPacket.MAP_DATA, buffer.array());
+            server.sendPacket(this, ServerPacket.MAP_DATA, buffer.toByteArray());
+            buffer.close();
         } catch (IOException e) {
             e.printStackTrace();//lmao
         }
