@@ -6,6 +6,7 @@
 export GITHUB_ORGANIZATION=thatshawt
 export GITHUB_REPO=2D-Game
 export VERSION_NAME=${BUILD_NUMBER}
+export PROJECT_NAME=GameServer
 
 echo "Deleting release from github before creating new one"
 linux-amd64-github-release delete --user ${GITHUB_ORGANIZATION} --repo ${GITHUB_REPO} --tag "${VERSION_NAME}"
