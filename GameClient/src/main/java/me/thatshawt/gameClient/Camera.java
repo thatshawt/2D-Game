@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Camera {
 
-    private AtomicInteger x,y;
+    private final AtomicInteger x,y;
     private int renderDistance;
 
     public Camera(int x, int y, int renderDistance) {
@@ -35,5 +35,18 @@ public class Camera {
 
     public void setRenderDistance(int renderDistance) {
         this.renderDistance = renderDistance;
+    }
+
+    public void addToRenderDistance(int a){
+        this.renderDistance += a;
+    }
+
+    @Override
+    public String toString() {
+        return "Camera{" +
+                "x=" + x +
+                ", y=" + y +
+                ", renderDistance=" + renderDistance +
+                '}';
     }
 }

@@ -12,6 +12,7 @@ public enum ServerPacket {
     PLAYER_LOGIN_RESPONSE,//sent to a player to tell them their player id
     PLAYER_ENTITY_SPAWN,
     ENTITY_REMOVE,
+    ENTITY_BORDER_MOVE, //whenever an entity crosses to another chunk
     PLAYER_CHAT;//every time someone chats, broadcast the message with this
 
     private static final Map<Integer, ServerPacket> packetMap = new HashMap<>();

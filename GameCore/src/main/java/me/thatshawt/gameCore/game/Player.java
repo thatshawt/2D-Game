@@ -12,8 +12,6 @@ public abstract class Player extends Entity implements Serializable{
     protected transient String chatMsg = "";
     private transient long chatTime;
 
-    protected transient int renderDistance = 10;
-
     public Player(int x, int y){
         super(x,y,new PlayerTile());
     }
@@ -30,16 +28,5 @@ public abstract class Player extends Entity implements Serializable{
     public String getChat(){
         return this.chatMsg;
     }
-
-    public int getRenderDistance() {
-        return renderDistance;
-    }
-
-    public void setRenderDistance(int renderDistance) {
-        this.renderDistance = renderDistance;
-    }
-
-    //client has different implementation from server so ima just make it abstract
-
 
 }

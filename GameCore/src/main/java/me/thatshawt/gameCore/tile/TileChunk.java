@@ -1,20 +1,21 @@
 package me.thatshawt.gameCore.tile;
 
+import me.thatshawt.gameCore.packets.PacketData;
 import me.thatshawt.gameCore.game.Entity;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class GameMap implements Serializable {
+public class TileChunk implements Serializable, PacketData {
 
     private static final long serialVersionUID = -4761830387139310254L;
     public List<Entity> entityList = new ArrayList<>();
     public Tile[][] tiles;
 
-    public GameMap(int size){
+    private TileChunk(int size){
         tiles = new Tile[size][size];
 
         for(int i=0;i<tiles.length;i++){
@@ -24,8 +25,10 @@ public class GameMap implements Serializable {
         }
     }
 
-    public GameMap(){
-        this(4);//idk cool size i guess
+    public static final int CHUNK_SIZE = 2;
+
+    public TileChunk(){
+        this(CHUNK_SIZE);//idk cool size i guess
     }
 
     public void addEntity(Entity entity){
@@ -37,10 +40,10 @@ public class GameMap implements Serializable {
     }
 
     public void removeEntity(UUID uuid){
-        removeEntity(entityFromUUID(uuid));
+        removeEntity(getEntity(uuid));
     }
 
-    public Entity entityFromUUID(UUID uuid){
+    public Entity getEntity(UUID uuid){
         for(Entity entity : entityList)
             if(entity.uuid.equals(uuid))return entity;
         return null;
@@ -65,18 +68,20 @@ public class GameMap implements Serializable {
         return false;
     }
 
-    public void putBytes(ByteArrayOutputStream buffer) throws IOException {
+    @Override
+    public byte[] toBytes() throws IOException {
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(byteStream);
         out.writeObject(this);
-        buffer.write(byteStream.toByteArray());
         out.close();
+        return byteStream.toByteArray();
     }
 
-    public static GameMap fromBytes(InputStream inz) throws IOException, ClassNotFoundException {
-        ObjectInputStream in = new ObjectInputStream(inz);
-        GameMap map = (GameMap)in.readObject();
-//        in.close(); //this would close the socket stream and thats funny lmao and unintended
-        return map;
+    @Override
+    public String toString() {
+        return "TileChunk{" +
+                "entityList=" + entityList +
+                ", tiles=" + Arrays.toString(tiles) +
+                '}';
     }
 }

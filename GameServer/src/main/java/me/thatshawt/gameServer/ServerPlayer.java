@@ -2,17 +2,16 @@ package me.thatshawt.gameServer;
 
 import me.thatshawt.gameCore.game.Player;
 import me.thatshawt.gameCore.packets.ServerPacket;
-import me.thatshawt.gameCore.tile.GameMap;
+import me.thatshawt.gameCore.tile.ChunkCoord;
+import me.thatshawt.gameCore.tile.TileChunk;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.util.UUID;
 
 public class ServerPlayer extends Player {
 
+    private int renderDistance = 10;
     private GameServer server;
     protected Socket socket;
 
@@ -50,12 +49,9 @@ public class ServerPlayer extends Player {
         server.sendPacket(player, ServerPacket.ENTITY_POSITION, buffer.array());
     }
 
-    public void sendMap(GameMap map){
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();//crude estimate lmao
+    public void sendChunk(ChunkCoord coord, TileChunk map){
         try {
-            map.putBytes(buffer);
-            server.sendPacket(this, ServerPacket.MAP_DATA, buffer.toByteArray());
-            buffer.close();
+            server.sendPacket(this, ServerPacket.MAP_DATA, coord.toBytes(), map.toBytes());
         } catch (IOException e) {
             e.printStackTrace();//lmao
         }
@@ -66,7 +62,7 @@ public class ServerPlayer extends Player {
     }
 
     public boolean moveDown(){
-        if(this.getY() == server.map.tiles[0].length-1)return false;
+        if(this.getY() == server.chunks.get(ChunkCoord.fromChunkXY(0,0)).tiles[0].length-1)return false;
         this.y.incrementAndGet();
 //        System.out.println("down");
         return true;
@@ -85,7 +81,7 @@ public class ServerPlayer extends Player {
     }
 
     public boolean moveRight(){
-        if(this.getX() == server.map.tiles.length-1)return false;
+        if(this.getX() == server.chunks.get(ChunkCoord.fromChunkXY(0,0)).tiles.length-1)return false;
         this.x.incrementAndGet();
         return true;
     }

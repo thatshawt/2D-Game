@@ -3,9 +3,10 @@ package me.thatshawt.gameServer;
 import me.thatshawt.gameCore.packets.ClientPacket;
 import me.thatshawt.gameCore.packets.GamePacket;
 import me.thatshawt.gameCore.packets.ServerPacket;
+import me.thatshawt.gameCore.tile.ChunkCoord;
+import me.thatshawt.gameCore.tile.TileChunk;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.util.UUID;
 
 public class ServerPlayerHandler extends Thread {
@@ -28,10 +29,15 @@ public class ServerPlayerHandler extends Thread {
     public void run() {
         try {
             {
-                ByteArrayOutputStream mapBuffer = new ByteArrayOutputStream();
-                server.map.putBytes(mapBuffer);
                 try{
-                server.sendPacket(player, ServerPacket.MAP_DATA, mapBuffer.toByteArray());
+//                    ByteArrayOutputStream mapBuffer = new ByteArrayOutputStream();
+                    ChunkCoord coord = ChunkCoord.fromChunkXY(0,0);
+                    TileChunk chunk = server.chunks.get(coord);
+                    player.sendChunk(coord, chunk);
+
+                    coord = ChunkCoord.fromChunkXY(1,0);
+                    chunk = server.chunks.get(coord);
+                    player.sendChunk(coord, chunk);
                 }catch(Exception e){
                     System.out.println("failed to send map data");
                     e.printStackTrace();
