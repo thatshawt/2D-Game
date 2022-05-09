@@ -17,13 +17,14 @@ sleep 10 # sleep to make sure that github updates and all...
 
 echo "Uploading the artifacts into github"
 #files=( ./GameServer/target/GameServer-1.0-SNAPSHOT-spring-boot.jar ) # get the jar file in target folder
-
+echo "Uploading GameServer..."
 linux-amd64-github-release upload --user ${GITHUB_ORGANIZATION} --repo ${GITHUB_REPO} --tag ${VERSION_NAME} \
  --name "${PROJECT_NAME}-${VERSION_NAME}.jar" --file "./GameServer/target/GameServer-1.0-SNAPSHOT-spring-boot.jar"
-
+echo "Uploading GameClient..."
 linux-amd64-github-release upload --user ${GITHUB_ORGANIZATION} --repo ${GITHUB_REPO} --tag ${VERSION_NAME} \
  --name "${PROJECT_NAME}-${VERSION_NAME}.jar" --file "./GameClient/target/GameClient-1.0-SNAPSHOT-spring-boot.jar"
 
+echo "Finished uploading!"
 #  --name "${PROJECT_NAME}-${VERSION_NAME}.jar" --file "${files[0]}"
 
 
