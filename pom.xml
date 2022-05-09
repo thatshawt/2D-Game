@@ -25,7 +25,8 @@
     </dependencies>
 
     <build>
-        <finalName>maven-unit-test</finalName>
+<!--        <finalName>maven-unit-test</finalName>-->
+<!--        <phase>test</phase>-->
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
