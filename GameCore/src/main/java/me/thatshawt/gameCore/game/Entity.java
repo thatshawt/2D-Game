@@ -1,9 +1,6 @@
 package me.thatshawt.gameCore.game;
 
-import me.thatshawt.gameCore.tile.ChunkCoord;
-import me.thatshawt.gameCore.tile.ChunkMap;
-import me.thatshawt.gameCore.tile.Tile;
-import me.thatshawt.gameCore.tile.TileChunk;
+import me.thatshawt.gameCore.tile.*;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -65,9 +62,9 @@ public abstract class Entity implements Serializable {
         TileChunk previousChunk = chunks.get(ChunkCoord.fromTileXY(oldX, oldY));
         TileChunk newChunk = chunks.get(ChunkCoord.fromTileXY(newX, newY));
         if(newChunk != previousChunk){
-            System.out.println("moved entity " + this + " from " + previousChunk + " to " + newChunk);
-            previousChunk.removeEntity(this);
+//            System.out.println("moved entity " + this + " from " + previousChunk + " to " + newChunk);
             newChunk.addEntity(this);
+            previousChunk.removeEntity(this);
         }
     }
 
@@ -85,7 +82,7 @@ public abstract class Entity implements Serializable {
      */
     public boolean checkCollision(Direction direction){
         Tile target = chunks.tileAt(getX() + direction.xOffset, getY() + direction.yOffset);
-        return target != null;
+        return target instanceof AirTile;
     }
 
     @Override

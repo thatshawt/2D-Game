@@ -405,7 +405,8 @@ public class GameClient extends JPanel implements Runnable {
             g.setFont(UI_FONT);
 
             for(TileChunk chunk :
-                    chunks.chunksWithinRenderDistance(getX(),getY(), player.getCamera().getRenderDistance())){
+                    chunks.chunksWithinRenderDistance(
+                            player.getX(), player.getY(), player.getCamera().getRenderDistance())){
                 for(Entity entity : chunk.entityList){
                     if(entity instanceof Player) {
                         Player playerEntity = (Player)entity;

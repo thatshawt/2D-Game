@@ -25,10 +25,10 @@ public class TileChunk implements Serializable, PacketData {
         }
     }
 
-    public static final int CHUNK_SIZE = 4;
+    public static final int CHUNK_SIZE = 8;
 
     public TileChunk(){
-        this(CHUNK_SIZE);//idk cool size i guess
+        this(CHUNK_SIZE);
     }
 
     public void addEntity(Entity entity){
