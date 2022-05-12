@@ -1,5 +1,7 @@
 package me.thatshawt.gameCore.game;
 
+import me.thatshawt.gameCore.tile.ChunkMap;
+
 import java.util.UUID;
 
 /**
@@ -10,8 +12,8 @@ public class NetworkPlayer extends Player{
 
     private static final long serialVersionUID = -3360067197945155592L;
 
-    public NetworkPlayer(int x, int y, UUID uuid) {
-        super(x, y, uuid);
+    public NetworkPlayer(ChunkMap chunks, int x, int y, UUID uuid) {
+        super(chunks, x, y, uuid);
     }
 
     @Override

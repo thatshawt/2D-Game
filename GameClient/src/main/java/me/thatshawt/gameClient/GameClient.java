@@ -50,6 +50,45 @@ public class GameClient extends JPanel implements Runnable {
             }
         });
 
+        this.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if(e.getButton() == 1){
+                    try {
+                        Point pixel = e.getPoint();
+                        Point tileCoord = pixelToTile(pixel);
+                        chunks.setTile(tileCoord.x, tileCoord.y, new WallTile());
+                    }catch (Exception ignore){}
+                }else{
+                    try {
+                        Point pixel = e.getPoint();
+                        Point tileCoord = pixelToTile(pixel);
+                        chunks.setTile(tileCoord.x, tileCoord.y, new AirTile());
+                    }catch (Exception ignore){}
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+
         this.addMouseMotionListener(new MouseMotionListener() {
             @Override
             public void mouseDragged(MouseEvent e) {
@@ -144,7 +183,7 @@ public class GameClient extends JPanel implements Runnable {
                 while (!(GameClient.this.serverConnection != null
                         && GameClient.this.serverConnection.isConnected())) {
                     try {
-                        Thread.sleep(500);//200 cant be that long lmao idk bruh
+                        Thread.sleep(500);
 //                        System.out.println("sleeping");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -161,8 +200,7 @@ public class GameClient extends JPanel implements Runnable {
                         int packetLength = input.readInt();
                         ServerPacket packet = ServerPacket.fromInt(input.readInt());
 
-//                        System.out.println("got packet idk man");
-                        System.out.println("received packet " + packet.name());
+//                        System.out.println("received packet " + packet.name());
                         switch(packet){
                             case ENTITY_POSITION: {
                                 UUID uuid = GamePacket.readUUID(input);
@@ -201,7 +239,7 @@ public class GameClient extends JPanel implements Runnable {
                                 UUID uuid = GamePacket.readUUID(input);
 //                                System.out.println("added " + uuid + "????!??!?!?!?11!?/1?");
 
-                                Player player = new NetworkPlayer(0,0, uuid);
+                                Player player = new NetworkPlayer(chunks, 0,0, uuid);
                                 if(!chunks.containsEntity(uuid)){
                                     chunks.get(ChunkCoord.fromChunkXY(0,0)).addEntity(player);
                                 }
@@ -221,7 +259,7 @@ public class GameClient extends JPanel implements Runnable {
                                 TileChunk chunk = PacketDataReader.readChunk(input);
 //                                System.out.println("received map data");
                                 this.chunks.put(coord, chunk);
-                                System.out.println(chunks);
+                                System.out.println("received " + chunk);
                             }
                             default:
                                 break;
@@ -265,9 +303,19 @@ public class GameClient extends JPanel implements Runnable {
 
     private Point tileToPixel(int tilex, int tiley){
         return new Point(
-                (tilex - player.getCamera().getX() + TileChunk.CHUNK_SIZE/2 + 1)*getBoxWidth(),
-                (tiley - player.getCamera().getY() + TileChunk.CHUNK_SIZE/2 + 1)*getBoxHeight()
+                (tilex - player.getCamera().getX() + player.getCamera().getRenderDistance()/2 - 1)*getBoxWidth(),
+                (tiley - player.getCamera().getY() + player.getCamera().getRenderDistance()/2 - 1)*getBoxHeight()
         );
+    }
+
+    private Point pixelToTile(int screenx, int screeny){
+        final int boxWidth = getBoxWidth();
+        final int boxHeight = getBoxHeight();
+        final Camera camera =  player.getCamera();
+//        player.getX() + i - gameMap.tiles.length/2 - 1
+        int x = screenx/boxWidth  + (camera.getX() - camera.getRenderDistance()/2 + 1);
+        int y = screeny/boxHeight + (camera.getY() - camera.getRenderDistance()/2 + 1);
+        return new Point(x,y);
     }
 
     private boolean tileWithinRenderDistance(int tilex, int tiley){
@@ -276,23 +324,12 @@ public class GameClient extends JPanel implements Runnable {
                 && pixel.y > 0 && pixel.y < this.getHeight();
     }
 
-    private Point pixelToTile(int screenx, int screeny){
-        final int boxWidth = getBoxWidth();
-        final int boxHeight = getBoxHeight();
-        final Camera camera =  player.getCamera();
-//        player.getX() + i - gameMap.tiles.length/2 - 1
-        int x = (screenx /*- (boxWidth/2)*/)/boxWidth  + (camera.getX() - camera.getRenderDistance()/2 + 1);
-        int y = (screeny /*- (boxHeight/2)*/)/boxHeight  + (camera.getY() - camera.getRenderDistance()/2 + 1);
-        return new Point(x,y);
-    }
-
     private Point pixelToTile(Point point){
         return pixelToTile(point.x, point.y);
     }
 
-    private Tile getTileAtPixel(int x, int y){
+    private Tile getRenderTileAt(int x, int y){
 //        System.out.printf("(x,y): %d,%d\n", x, y);
-        //out of bounds char
         Entity entityAtLocation = chunks.getFirstEntityAt(x,y);
         ChunkCoord chunkCoord = ChunkCoord.fromChunkXY(x/TileChunk.CHUNK_SIZE,y/TileChunk.CHUNK_SIZE);
         if(!chunks.containsKey(chunkCoord))
@@ -304,18 +341,13 @@ public class GameClient extends JPanel implements Runnable {
     }
 
     private char getRenderCharAtTile(int x, int y){
-        Tile tile = getTileAtPixel(x,y);
+        Tile tile = getRenderTileAt(x,y);
         char renderChar = '#';
         if(tile != null){
             renderChar = tile.getChar();
         }
         return renderChar;
     }
-
-//    private Point getTileCoordinateAtXY(int x, int y){
-//        player.getX() + i - gameMap.tiles.length/2 - 1,
-//                player.getY() + j - gameMap.tiles[0].length/2 - 1
-//    }
 
     private void drawMainGame(Graphics g){
         final int screenWidth = this.getWidth();
@@ -346,7 +378,7 @@ public class GameClient extends JPanel implements Runnable {
                             camera.getX() + i - HALF_RENDER_DISTANCE + 1,
                             camera.getY() + j - HALF_RENDER_DISTANCE + 1
                             );
-                    Tile tile = getTileAtPixel(tileCoord.x, tileCoord.y);
+                    Tile tile = getRenderTileAt(tileCoord.x, tileCoord.y);
                     char renderChar = getRenderCharAtTile(tileCoord.x, tileCoord.y);
                     if(tile instanceof PlayerTile)
                         g.setFont(PLAYER_FONT);
@@ -372,29 +404,29 @@ public class GameClient extends JPanel implements Runnable {
             g.setColor(Color.LIGHT_GRAY);
             g.setFont(UI_FONT);
 
-            for(Entity entity : chunks.get(ChunkCoord.fromChunkXY(0,0)).entityList){
-                if(entity instanceof Player) {
-                    Player playerEntity = (Player)entity;
-                    Point pixelPosition = tileToPixel(playerEntity.getX(), playerEntity.getY());
-//                    System.out.println(pixelPosition);
-                    g.drawString(playerEntity.getChat(), pixelPosition.x, pixelPosition.y);
+            for(TileChunk chunk :
+                    chunks.chunksWithinRenderDistance(getX(),getY(), player.getCamera().getRenderDistance())){
+                for(Entity entity : chunk.entityList){
+                    if(entity instanceof Player) {
+                        Player playerEntity = (Player)entity;
+                        Point pixelPosition = tileToPixel(playerEntity.getX(), playerEntity.getY());
+                        g.drawString(playerEntity.getChat(), pixelPosition.x, pixelPosition.y);
+                    }
                 }
             }
+
 
             Point point = lastMouseLocation.get();
             Point tilePoint = pixelToTile(point);
 
-//            g.drawString(String.valueOf(getRenderTileAt(tilePoint.x, tilePoint.y)), point.x, point.y);
-//        g.drawString(String.format("(%d, %d)", tilePoint.x, tilePoint.y), point.x, point.y);
-
+            //lmao
             if(chatting){
-                //lmao
                 g.drawString(chatMessage, 40, 40);
 //            System.out.println(chatMessage);
             }
 
             if(debug.get()){
-                Tile tile = getTileAtPixel(tilePoint.x, tilePoint.y);
+                Tile tile = getRenderTileAt(tilePoint.x, tilePoint.y);
                 String[] debugMsg = {
                         String.format("mouseTileXY:(%d,%d)\n",tilePoint.x,tilePoint.y),
                         String.format("mouseTile:%s", tile == null ? "null" : tile.getClass().getSimpleName()),
@@ -429,7 +461,6 @@ public class GameClient extends JPanel implements Runnable {
         drawUILayer(g);
     }
 
-    //so this class has two in one basically lmao
     public void run() {
         while(true){//simple loop for simple game
             try {
@@ -455,7 +486,7 @@ public class GameClient extends JPanel implements Runnable {
 
         frame.add(gameClient);
 
-        frame.setLocation(2300,350); //position i used to make debugging quicker
+        if(debug)frame.setLocation(2300,350);
         frame.setSize(650, 650);
 
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

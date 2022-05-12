@@ -1,5 +1,6 @@
 package me.thatshawt.gameServer;
 
+import me.thatshawt.gameCore.game.Direction;
 import me.thatshawt.gameCore.game.Player;
 import me.thatshawt.gameCore.packets.ServerPacket;
 import me.thatshawt.gameCore.tile.ChunkCoord;
@@ -16,7 +17,7 @@ public class ServerPlayer extends Player {
     protected Socket socket;
 
     public ServerPlayer(GameServer server, Socket socket, int x, int y) {
-        super(x, y);
+        super(server.chunks, x, y);
         this.socket = socket;
         this.server = server;
     }
@@ -62,26 +63,30 @@ public class ServerPlayer extends Player {
     }
 
     public boolean moveDown(){
-        if(this.getY() == server.chunks.get(ChunkCoord.fromChunkXY(0,0)).tiles[0].length-1)return false;
+//        if(this.getY() == server.chunks.get(ChunkCoord.fromTileXY(x,y)))return false;
+        if(!checkCollision(Direction.DOWN))return false;
         this.y.incrementAndGet();
 //        System.out.println("down");
         return true;
     }
 
     public boolean moveUp(){
-        if(this.getY() == 0)return false;
+//        if(this.getY() == 0)return false;
+        if(!checkCollision(Direction.UP))return false;
         this.y.decrementAndGet();
         return true;
     }
 
     public boolean moveLeft(){
-        if(this.getX() == 0)return false;
+//        if(this.getX() == 0)return false;
+        if(!checkCollision(Direction.LEFT))return false;
         this.x.decrementAndGet();
         return true;
     }
 
     public boolean moveRight(){
-        if(this.getX() == server.chunks.get(ChunkCoord.fromChunkXY(0,0)).tiles.length-1)return false;
+//        if(this.getX() == server.chunks.get(ChunkCoord.fromChunkXY(0,0)).tiles.length-1)return false;
+        if(!checkCollision(Direction.RIGHT))return false;
         this.x.incrementAndGet();
         return true;
     }

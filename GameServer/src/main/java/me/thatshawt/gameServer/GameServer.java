@@ -24,9 +24,7 @@ public class GameServer{
 
         chunks = new ChunkMap();
         chunks.put(ChunkCoord.fromChunkXY(1,0), new TileChunk());
-//        map = new TileChunk();
 
-        //make it synchronized cus i access it from main thread and clientThread thread
         Thread playerAcceptingThread = new Thread(() -> {
             while (true) {
 

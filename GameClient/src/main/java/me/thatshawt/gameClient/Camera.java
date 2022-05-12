@@ -1,5 +1,8 @@
 package me.thatshawt.gameClient;
 
+import me.thatshawt.gameCore.tile.ChunkMap;
+import me.thatshawt.gameCore.tile.TileChunk;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Camera {

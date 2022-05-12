@@ -1,5 +1,6 @@
 package me.thatshawt.gameClient;
 
+import me.thatshawt.gameCore.game.Direction;
 import me.thatshawt.gameCore.game.Player;
 import me.thatshawt.gameCore.packets.ClientPacket;
 import me.thatshawt.gameCore.tile.ChunkCoord;
@@ -16,16 +17,16 @@ public class ClientPlayer extends Player{
     public transient boolean cameraFollow = true;
 
     public ClientPlayer(GameClient gameClient, int x, int y, UUID uuid) {
-        super(x, y, uuid);
+        super(gameClient.chunks, x, y, uuid);
         this.camera = new Camera(x,y,10);
         this.gameClient = gameClient;
     }
 
-    private void sendMovement(int xOffset, int yOffset) {
+    private void sendMovement(Direction direction) {
         ByteBuffer byteBuffer = ByteBuffer.allocate(4*2);
 
-        byteBuffer.putInt(xOffset);
-        byteBuffer.putInt(yOffset);
+        byteBuffer.putInt(direction.xOffset);
+        byteBuffer.putInt(direction.yOffset);
 
         try {
             gameClient.sendPacket(ClientPacket.PLAYER_MOVE, byteBuffer.array());
@@ -51,30 +52,38 @@ public class ClientPlayer extends Player{
     }
 
     public boolean moveDown(){
-        if(!gameClient.chunks.containsKey(ChunkCoord.fromTileXY(x.get(),y.get()+1)))return false;
-        sendMovement(0, 1);
+//        if(!gameClient.chunks.containsKey(ChunkCoord.fromTileXY(x.get(),y.get()+1)))return false;
+        if(!checkCollision(Direction.DOWN))return false;
+
+        sendMovement(Direction.DOWN);
 //        System.out.println("down");
         return true;
     }
 
     public boolean moveUp(){
-        if(!gameClient.chunks.containsKey(ChunkCoord.fromTileXY(x.get(),y.get()-1)))return false;
+//        if(!gameClient.chunks.containsKey(ChunkCoord.fromTileXY(x.get(),y.get()-1)))return false;
+        if(!checkCollision(Direction.UP))return false;
+
 //        this.y.decrementAndGet();
-        sendMovement(0, -1);
+        sendMovement(Direction.UP);
         return true;
     }
 
     public boolean moveRight(){
-        if(!gameClient.chunks.containsKey(ChunkCoord.fromTileXY(x.get()+1,y.get())))return false;
+//        if(!gameClient.chunks.containsKey(ChunkCoord.fromTileXY(x.get()+1,y.get())))return false;
+        if(!checkCollision(Direction.RIGHT))return false;
+
 //        this.x.incrementAndGet();
-        sendMovement(1,0);
+        sendMovement(Direction.RIGHT);
         return true;
     }
 
     public boolean moveLeft(){
-        if(!gameClient.chunks.containsKey(ChunkCoord.fromTileXY(x.get()-1,y.get())))return false;
+//        if(!gameClient.chunks.containsKey(ChunkCoord.fromTileXY(x.get()-1,y.get())))return false;
+        if(!checkCollision(Direction.LEFT))return false;
+
 //        this.x.decrementAndGet();
-        sendMovement(-1,0);
+        sendMovement(Direction.LEFT);
         return true;
     }
 
