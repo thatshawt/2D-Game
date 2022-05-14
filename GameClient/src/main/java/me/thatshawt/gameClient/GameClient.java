@@ -18,9 +18,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-//TODO: make the combat with arrows and you hit one tile range i guess
-//TODO: after combat add an AI that you can punch to test the combat lmao
-
 public class GameClient extends JPanel implements Runnable {
 
     public static final int FPS = 24;
@@ -31,9 +28,7 @@ public class GameClient extends JPanel implements Runnable {
     private GameControllerThread gameControllerThread;
 
     protected Socket serverConnection;
-//    protected TileChunk tileChunk;
     protected ClientPlayer player;
-//    protected Camera camera;
 
     private AtomicReference<Point> lastMouseLocation = new AtomicReference<>(new Point(0,0));
     private boolean chatting = false;
@@ -42,8 +37,6 @@ public class GameClient extends JPanel implements Runnable {
     protected ChunkMap chunks = new ChunkMap();
 
     public GameClient(){
-//        tileChunk = new TileChunk();
-
         this.addMouseWheelListener(e -> {
             if(!chatting){
                 player.getCamera().addToRenderDistance(e.getWheelRotation());
@@ -105,7 +98,7 @@ public class GameClient extends JPanel implements Runnable {
         this.addKeyListener(new KeyListener() {
             public void keyTyped(KeyEvent e) {
 
-                if(e.getKeyChar() == KeyEvent.VK_ENTER){//pressed enter
+                if(e.getKeyChar() == KeyEvent.VK_ENTER){
                     if(chatting){
                         try {
                             player.sendChat(chatMessage);
@@ -114,13 +107,12 @@ public class GameClient extends JPanel implements Runnable {
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
-                    }else{//enter typing mode
+                    }else{
                         chatting = true;
                     }
 
                 }else if(chatting &&
-                        (Character.isLetterOrDigit(e.getKeyChar()) || e.getKeyChar() == ' ')) {//otherwise we just put all the poop into the pee
-//                    System.out.println("typed: " + e.getKeyChar());
+                        (Character.isLetterOrDigit(e.getKeyChar()) || e.getKeyChar() == ' ')) {
                     chatMessage += e.getKeyChar();
                     chatMessage = chatMessage.substring(0, Math.min(chatMessage.length(),GamePacket.MAX_CHAT_LENGTH));
                 }else{
@@ -157,7 +149,6 @@ public class GameClient extends JPanel implements Runnable {
 
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE){
-//                    System.out.println("hit backspaec");
                     if(chatting){
                         try {
                             chatMessage = chatMessage.substring(0, chatMessage.length() - 1);
@@ -177,14 +168,11 @@ public class GameClient extends JPanel implements Runnable {
         renderThread.start();
 
         packetThread = new Thread(() -> {
-            //always try to do this until the thread is killed
             while(true) {
-                //wait for the connection to be not null and connected
                 while (!(GameClient.this.serverConnection != null
                         && GameClient.this.serverConnection.isConnected())) {
                     try {
                         Thread.sleep(500);
-//                        System.out.println("sleeping");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -196,22 +184,16 @@ public class GameClient extends JPanel implements Runnable {
 
                     //packet parsing and handling
                     while(true) {
-//                        System.out.println("reading packet...");
                         int packetLength = input.readInt();
                         ServerPacket packet = ServerPacket.fromInt(input.readInt());
 
-//                        System.out.println("received packet " + packet.name());
                         switch(packet){
                             case ENTITY_POSITION: {
                                 UUID uuid = GamePacket.readUUID(input);
                                 int x = input.readInt();
                                 int y = input.readInt();
 
-//                                System.out.println(uuid);
-
                                 if(chunks.containsEntity(uuid)) chunks.getEntity(uuid).setXY(x,y);
-
-//                                System.out.printf("uuid: %s, x: %d, y: %d\n", uuid.toString(), x, y);
                                 break;
                             }
                             case PLAYER_CHAT: {
@@ -220,7 +202,6 @@ public class GameClient extends JPanel implements Runnable {
                                 UUID uuid = GamePacket.readUUID(input);
                                 input.read(buffer);
                                 String message = new String(buffer);
-//                                System.out.println("received " + message);
 
                                 Player player = (Player) chunks.getEntity(uuid);
                                 player.setChat(message);
@@ -228,7 +209,6 @@ public class GameClient extends JPanel implements Runnable {
                             }
                             case PLAYER_LOGIN_RESPONSE: {
                                 UUID uuid = GamePacket.readUUID(input);
-//                                System.out.println("login responce: " + uuid);
                                 this.player = new ClientPlayer(this, 0,0, uuid);
                                 chunks.get(ChunkCoord.fromChunkXY(0,0)).addEntity(this.player);
 
@@ -237,7 +217,6 @@ public class GameClient extends JPanel implements Runnable {
                             }
                             case PLAYER_ENTITY_SPAWN: {
                                 UUID uuid = GamePacket.readUUID(input);
-//                                System.out.println("added " + uuid + "????!??!?!?!?11!?/1?");
 
                                 Player player = new NetworkPlayer(chunks, 0,0, uuid);
                                 if(!chunks.containsEntity(uuid)){
@@ -257,7 +236,6 @@ public class GameClient extends JPanel implements Runnable {
                             case MAP_DATA:{
                                 ChunkCoord coord = PacketDataReader.readChunkCoord(input);
                                 TileChunk chunk = PacketDataReader.readChunk(input);
-//                                System.out.println("received map data");
                                 this.chunks.put(coord, chunk);
                                 System.out.println("received " + chunk);
                             }
@@ -271,10 +249,6 @@ public class GameClient extends JPanel implements Runnable {
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-//                catch (ClassNotFoundException e) {
-//                    e.printStackTrace();
-//                }
-
             }
         });
 
@@ -312,7 +286,6 @@ public class GameClient extends JPanel implements Runnable {
         final int boxWidth = getBoxWidth();
         final int boxHeight = getBoxHeight();
         final Camera camera =  player.getCamera();
-//        player.getX() + i - gameMap.tiles.length/2 - 1
         int x = screenx/boxWidth  + (camera.getX() - camera.getRenderDistance()/2 + 1);
         int y = screeny/boxHeight + (camera.getY() - camera.getRenderDistance()/2 + 1);
         return new Point(x,y);
@@ -329,7 +302,6 @@ public class GameClient extends JPanel implements Runnable {
     }
 
     private Tile getRenderTileAt(int x, int y){
-//        System.out.printf("(x,y): %d,%d\n", x, y);
         Entity entityAtLocation = chunks.getFirstEntityAt(x,y);
         ChunkCoord chunkCoord = ChunkCoord.fromChunkXY(x/TileChunk.CHUNK_SIZE,y/TileChunk.CHUNK_SIZE);
         if(!chunks.containsKey(chunkCoord))
@@ -370,7 +342,6 @@ public class GameClient extends JPanel implements Runnable {
             //draw tiles
             g.setColor(Color.WHITE);
             g.setFont(CHAR_FONT);
-//            final Camera camera = player.getCamera();
             final int HALF_RENDER_DISTANCE = (int)((float)camera.getRenderDistance()/2.0f);
             for(int i = -HALF_RENDER_DISTANCE; i < camera.getRenderDistance(); i++){
                 for(int j = -HALF_RENDER_DISTANCE; j < camera.getRenderDistance(); j++){
@@ -420,10 +391,8 @@ public class GameClient extends JPanel implements Runnable {
             Point point = lastMouseLocation.get();
             Point tilePoint = pixelToTile(point);
 
-            //lmao
             if(chatting){
                 g.drawString(chatMessage, 40, 40);
-//            System.out.println(chatMessage);
             }
 
             if(debug.get()){
@@ -449,7 +418,6 @@ public class GameClient extends JPanel implements Runnable {
         }
     }
 
-    //TODO: maybe implement this so the user can choose the server to join or something
     private void renderMainMenu(){ }
 
     //i read online that i was supposed to use a jpanel instead of a jframe sooo i ended up using that
