@@ -1,5 +1,9 @@
 package me.thatshawt.gameClient;
 
+import me.thatshawt.gameClient.gui.DebugLayer;
+import me.thatshawt.gameClient.gui.MainGameScreen;
+import me.thatshawt.gameClient.gui.ScreenRenderer;
+import me.thatshawt.gameClient.gui.UILayer;
 import me.thatshawt.gameCore.game.Entity;
 import me.thatshawt.gameCore.game.NetworkPlayer;
 import me.thatshawt.gameCore.game.Player;
@@ -10,10 +14,14 @@ import me.thatshawt.gameCore.packets.ServerPacket;
 import me.thatshawt.gameCore.tile.*;
 
 import javax.swing.*;
+//import java.awt.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -30,11 +38,13 @@ public class GameClient extends JPanel implements Runnable {
     protected Socket serverConnection;
     protected ClientPlayer player;
 
-    private AtomicReference<Point> lastMouseLocation = new AtomicReference<>(new Point(0,0));
-    private boolean chatting = false;
-    private String chatMessage = "";
-    private AtomicBoolean debug = new AtomicBoolean(true);
-    protected ChunkMap chunks = new ChunkMap();
+    private List<ScreenRenderer> screenRenderers = new ArrayList<>();
+
+    public final AtomicReference<Point> lastMouseLocation = new AtomicReference<>(new Point(0,0));
+    public boolean chatting = false;
+    public String chatMessage = "";
+    public final AtomicBoolean debug = new AtomicBoolean(false);
+    public ChunkMap chunks = new ChunkMap();
 
     public GameClient(){
         this.addMouseWheelListener(e -> {
@@ -46,11 +56,21 @@ public class GameClient extends JPanel implements Runnable {
         this.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-
+                for(ScreenRenderer renderer : screenRenderers){
+                    if(renderer instanceof UILayer){
+                        ((UILayer)renderer).passMouseClickEvent(e);
+                    }
+                }
             }
 
             @Override
             public void mousePressed(MouseEvent e) {
+                for(ScreenRenderer renderer : screenRenderers){
+                    if(renderer instanceof UILayer){
+                        ((UILayer)renderer).passMouseDownEvent(e);
+                    }
+                }
+
                 if(e.getButton() == 1){
                     try {
                         Point pixel = e.getPoint();
@@ -68,7 +88,11 @@ public class GameClient extends JPanel implements Runnable {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-
+                for(ScreenRenderer renderer : screenRenderers){
+                    if(renderer instanceof UILayer){
+                        ((UILayer)renderer).passMouseUpEvent(e);
+                    }
+                }
             }
 
             @Override
@@ -164,6 +188,12 @@ public class GameClient extends JPanel implements Runnable {
             }
         });
 
+        screenRenderers.add(new MainGameScreen(this));
+        screenRenderers.add(new DebugLayer(this));
+        screenRenderers.add(new UILayer(this));
+        //render the smallest zindexes first
+        screenRenderers.sort(Comparator.comparingInt(o -> o.zindex));
+
         renderThread = new Thread(this);
         renderThread.start();
 
@@ -172,7 +202,7 @@ public class GameClient extends JPanel implements Runnable {
                 while (!(GameClient.this.serverConnection != null
                         && GameClient.this.serverConnection.isConnected())) {
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -260,11 +290,11 @@ public class GameClient extends JPanel implements Runnable {
     }
 
     //idea to use JLabel from: https://stackoverflow.com/a/11592041/5513686
-    private static final Font CHAR_FONT =
+    public static final Font CHAR_FONT =
                 new Font(new JLabel().getFont().getName(), Font.PLAIN, 25);
-    private static final Font PLAYER_FONT =
+    public static final Font PLAYER_FONT =
                 new Font("Times New Roman", Font.BOLD, 25);
-    private static final Font UI_FONT =
+    public static final Font UI_FONT =
             new Font(new JLabel().getFont().getName(), Font.PLAIN, 18);
 
     private int getBoxWidth(){
@@ -275,7 +305,7 @@ public class GameClient extends JPanel implements Runnable {
         return this.getHeight() / player.getCamera().getRenderDistance();
     }
 
-    private Point tileToPixel(int tilex, int tiley){
+    public Point tileToPixel(int tilex, int tiley){
         return new Point(
                 (tilex - player.getCamera().getX() + player.getCamera().getRenderDistance()/2 - 1)*getBoxWidth(),
                 (tiley - player.getCamera().getY() + player.getCamera().getRenderDistance()/2 - 1)*getBoxHeight()
@@ -297,11 +327,11 @@ public class GameClient extends JPanel implements Runnable {
                 && pixel.y > 0 && pixel.y < this.getHeight();
     }
 
-    private Point pixelToTile(Point point){
+    public Point pixelToTile(Point point){
         return pixelToTile(point.x, point.y);
     }
 
-    private Tile getRenderTileAt(int x, int y){
+    public Tile getRenderTileAt(int x, int y){
         Entity entityAtLocation = chunks.getFirstEntityAt(x,y);
         ChunkCoord chunkCoord = ChunkCoord.fromChunkXY(x/TileChunk.CHUNK_SIZE,y/TileChunk.CHUNK_SIZE);
         if(!chunks.containsKey(chunkCoord))
@@ -312,7 +342,7 @@ public class GameClient extends JPanel implements Runnable {
             return chunks.tileAt(x,y); //tile at location
     }
 
-    private char getRenderCharAtTile(int x, int y){
+    public char getRenderCharAtTile(int x, int y){
         Tile tile = getRenderTileAt(x,y);
         char renderChar = '#';
         if(tile != null){
@@ -321,113 +351,15 @@ public class GameClient extends JPanel implements Runnable {
         return renderChar;
     }
 
-    private void drawMainGame(Graphics g){
-        final int screenWidth = this.getWidth();
-        final int screenHeight = this.getHeight();
-
-        if(player == null){
-            g.setColor(Color.black);
-            g.fillRect(0,0, screenWidth, screenHeight);
-            g.setColor(Color.white);
-            g.drawString("loading i guess...", screenWidth/2, screenHeight/2);
-        }else{
-            final Camera camera = player.getCamera();
-            final int boxWidth = screenWidth / camera.getRenderDistance();
-            final int boxHeight = screenHeight / camera.getRenderDistance();
-
-            //clear screen
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, screenWidth, screenHeight);
-
-            //draw tiles
-            g.setColor(Color.WHITE);
-            g.setFont(CHAR_FONT);
-            final int HALF_RENDER_DISTANCE = (int)((float)camera.getRenderDistance()/2.0f);
-            for(int i = -HALF_RENDER_DISTANCE; i < camera.getRenderDistance(); i++){
-                for(int j = -HALF_RENDER_DISTANCE; j < camera.getRenderDistance(); j++){
-                    Point tileCoord = new Point(
-                            camera.getX() + i - HALF_RENDER_DISTANCE + 1,
-                            camera.getY() + j - HALF_RENDER_DISTANCE + 1
-                            );
-                    Tile tile = getRenderTileAt(tileCoord.x, tileCoord.y);
-                    char renderChar = getRenderCharAtTile(tileCoord.x, tileCoord.y);
-                    if(tile instanceof PlayerTile)
-                        g.setFont(PLAYER_FONT);
-
-                    g.drawString(
-                            String.valueOf(renderChar),
-                            boxWidth*i + boxWidth/2,
-                            boxHeight*j + boxHeight/2);
-                    g.setFont(CHAR_FONT);
-                }
-            }
-        }
-    }
-
-    private void drawUILayer(Graphics g){
-        if(player != null){
-            final int screenWidth = this.getWidth();
-            final int screenHeight = this.getHeight();
-            final Camera camera = player.getCamera();
-            final int boxWidth = screenWidth / camera.getRenderDistance();
-            final int boxHeight = screenHeight / camera.getRenderDistance();
-
-            g.setColor(Color.LIGHT_GRAY);
-            g.setFont(UI_FONT);
-
-            for(TileChunk chunk :
-                    chunks.chunksWithinRenderDistance(
-                            player.getX(), player.getY(), player.getCamera().getRenderDistance())){
-                for(Entity entity : chunk.entityList){
-                    if(entity instanceof Player) {
-                        Player playerEntity = (Player)entity;
-                        Point pixelPosition = tileToPixel(playerEntity.getX(), playerEntity.getY());
-                        g.drawString(playerEntity.getChat(), pixelPosition.x, pixelPosition.y);
-                    }
-                }
-            }
-
-
-            Point point = lastMouseLocation.get();
-            Point tilePoint = pixelToTile(point);
-
-            if(chatting){
-                g.drawString(chatMessage, 40, 40);
-            }
-
-            if(debug.get()){
-                Tile tile = getRenderTileAt(tilePoint.x, tilePoint.y);
-                String[] debugMsg = {
-                        String.format("mouseTileXY:(%d,%d)\n",tilePoint.x,tilePoint.y),
-                        String.format("mouseTile:%s", tile == null ? "null" : tile.getClass().getSimpleName()),
-                        String.format("camera:%s",camera)
-                };
-                FontMetrics fontMetrics = g.getFontMetrics(UI_FONT);
-                final int height = fontMetrics.getHeight();
-                for(int i=0;i<debugMsg.length;i++){
-                    String s = debugMsg[i];
-                    int x = 5;
-                    int y = 30;
-                    g.setColor(Color.RED);
-                    g.fillRect(x,y+height*(i-1),fontMetrics.stringWidth(s)+5, height+10);
-                    g.setColor(Color.white);
-                    g.drawString(s, x,y + height*i);
-                }
-
-            }
-        }
-    }
-
-    private void renderMainMenu(){ }
-
     //i read online that i was supposed to use a jpanel instead of a jframe sooo i ended up using that
     //it worked cus using a jpanel fixed LOTS of white flickering
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        drawMainGame(g);
-        drawUILayer(g);
+        for(ScreenRenderer renderer : screenRenderers) {
+            if (renderer.enabled) renderer.render(g);
+        }
     }
 
     public void run() {
@@ -443,10 +375,6 @@ public class GameClient extends JPanel implements Runnable {
 
     public void sendPacket(ClientPacket packet, byte[] data) throws IOException {
         GamePacket.sendPacket(packet.ordinal(), serverConnection.getOutputStream(), data);
-    }
-
-    public void sendPacket(ClientPacket packet) throws IOException {
-        sendPacket(packet, new byte[]{});
     }
 
     public static void testRun(String[] args, boolean debug){
@@ -488,4 +416,7 @@ public class GameClient extends JPanel implements Runnable {
         testRun(args, true);
     }
 
+    public ClientPlayer getPlayer() {
+        return player;
+    }
 }

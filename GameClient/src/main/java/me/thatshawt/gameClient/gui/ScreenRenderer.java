@@ -2,8 +2,14 @@ package me.thatshawt.gameClient.gui;
 
 import java.awt.*;
 
-public interface ScreenRenderer {
+public abstract class ScreenRenderer {
 
-    void render(Graphics g);
+    public int zindex;
+    public boolean enabled = true;
+    public ScreenRenderer(int zindex) {
+        this.zindex = zindex;
+    }
+
+    public abstract void render(Graphics g);
 
 }
