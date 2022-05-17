@@ -1,5 +1,7 @@
 package me.thatshawt.gameClient.gui;
 
+import me.thatshawt.gameClient.GameClient;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
@@ -25,6 +27,13 @@ public abstract class UIComponent {
     public boolean isInRegion(int x, int y){
         return x <= this.x+width  && x >= this.x
             && y <= this.y+height && y >= this.y;
+    }
+
+    protected void drawStringCentered(Graphics g, Font f, String s){
+        FontMetrics fontMetrics = g.getFontMetrics(f);
+        final int stringHeight = fontMetrics.getHeight();
+        final int stringWidth = fontMetrics.stringWidth(s);
+        g.drawString(s, x+(width-stringWidth)/2, y+(height-stringHeight)/2 + stringHeight/2);
     }
 
     abstract void onMouseDown(MouseEvent e);

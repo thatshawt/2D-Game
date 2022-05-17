@@ -22,9 +22,10 @@ public abstract class UIButton extends UIComponent{
 
         g.setFont(GameClient.UI_FONT);
         g.setColor(Color.BLACK);
-        FontMetrics fontMetrics = g.getFontMetrics(GameClient.UI_FONT);
-        final int stringHeight = fontMetrics.getHeight();
-        final int stringWidth = fontMetrics.stringWidth(text);
-        g.drawString(text, x+(width-stringWidth)/2, y+(height-stringHeight)/2 + stringHeight/2);
+//        FontMetrics fontMetrics = g.getFontMetrics(GameClient.UI_FONT);
+//        final int stringHeight = fontMetrics.getHeight();
+//        final int stringWidth = fontMetrics.stringWidth(text);
+//        g.drawString(text, x+(width-stringWidth)/2, y+(height-stringHeight)/2 + stringHeight/2);
+        drawStringCentered(g, GameClient.UI_FONT, text);
     }
 }

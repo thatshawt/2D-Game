@@ -3,10 +3,13 @@ package me.thatshawt.gameClient.gui;
 import me.thatshawt.gameClient.Camera;
 import me.thatshawt.gameClient.ClientPlayer;
 import me.thatshawt.gameClient.GameClient;
+import me.thatshawt.gameCore.tile.AirTile;
 import me.thatshawt.gameCore.tile.PlayerTile;
 import me.thatshawt.gameCore.tile.Tile;
+import me.thatshawt.gameCore.tile.WallTile;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
 
 public class MainGameScreen extends ScreenRenderer{
 
@@ -16,6 +19,34 @@ public class MainGameScreen extends ScreenRenderer{
     }
 
     private final GameClient client;
+
+    @Override
+    public boolean onMouseDown(MouseEvent e) {
+        if(e.getButton() == 1){
+            try {
+                Point pixel = e.getPoint();
+                Point tileCoord = client.pixelToTile(pixel);
+                client.chunks.setTile(tileCoord.x, tileCoord.y, new WallTile());
+            }catch (Exception ignore){}
+        }else{
+            try {
+                Point pixel = e.getPoint();
+                Point tileCoord = client.pixelToTile(pixel);
+                client.chunks.setTile(tileCoord.x, tileCoord.y, new AirTile());
+            }catch (Exception ignore){}
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onMouseUp(MouseEvent e) {
+        return true;
+    }
+
+    @Override
+    public boolean onMouseClick(MouseEvent e) {
+        return true;
+    }
 
     public void render(Graphics g) {
         final int screenWidth = client.getWidth();

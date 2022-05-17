@@ -1,12 +1,15 @@
 package me.thatshawt.gameClient.gui;
 
+import me.thatshawt.gameClient.ClientPlayer;
 import me.thatshawt.gameClient.GameClient;
+import me.thatshawt.gameCore.game.Entity;
+import me.thatshawt.gameCore.game.Player;
+import me.thatshawt.gameCore.tile.TileChunk;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-//import java.util.List;
 
 public class UILayer extends ScreenRenderer{
 
@@ -35,28 +38,64 @@ public class UILayer extends ScreenRenderer{
         });
     }
 
-    public void passMouseClickEvent(MouseEvent e){
+    public boolean onMouseClick(MouseEvent e){
         for(UIComponent component : components){
             Point mouseLoc = client.lastMouseLocation.get();
-            if(component.isInRegion(mouseLoc.x, mouseLoc.y))component.onMouseClick(e);
+            if(component.isInRegion(mouseLoc.x, mouseLoc.y)){
+                component.onMouseClick(e);
+                return true;
+            }
         }
+        return false;
     }
-    public void passMouseDownEvent(MouseEvent e){
+
+    public boolean onMouseDown(MouseEvent e){
         for(UIComponent component : components){
             Point mouseLoc = client.lastMouseLocation.get();
-            if(component.isInRegion(mouseLoc.x, mouseLoc.y))component.onMouseDown(e);
+            if(component.isInRegion(mouseLoc.x, mouseLoc.y)){
+                component.onMouseDown(e);
+                return true;
+            }
         }
+        return false;
     }
-    public void passMouseUpEvent(MouseEvent e){
+
+    public boolean onMouseUp(MouseEvent e){
         for(UIComponent component : components){
             Point mouseLoc = client.lastMouseLocation.get();
-            if(component.isInRegion(mouseLoc.x, mouseLoc.y))component.onMouseUp(e);
+            if(component.isInRegion(mouseLoc.x, mouseLoc.y)){
+                component.onMouseUp(e);
+                return true;
+            }
         }
+        return false;
     }
 
     @Override
     public void render(Graphics g) {
         Point mouseLoc = client.lastMouseLocation.get();
+        ClientPlayer player = client.getPlayer();
+        if(player != null) {
+            g.setColor(Color.LIGHT_GRAY);
+            g.setFont(GameClient.UI_FONT);
+
+            for (TileChunk chunk :
+                    client.chunks.chunksWithinRenderDistance(
+                            player.getX(), player.getY(), player.getCamera().getRenderDistance())) {
+                for (Entity entity : chunk.entityList) {
+                    if (entity instanceof Player) {
+                        Player playerEntity = (Player) entity;
+                        Point pixelPosition = client.tileToPixel(playerEntity.getX(), playerEntity.getY());
+                        g.drawString(playerEntity.getChat(), pixelPosition.x, pixelPosition.y);
+                    }
+                }
+            }
+
+            if (client.chatting) {
+                g.drawString(client.chatMessage, 40, 40);
+            }
+        }
+
         for(UIComponent component : components){
             if(component.isInRegion(mouseLoc.x, mouseLoc.y))
                 component.hovering = true;

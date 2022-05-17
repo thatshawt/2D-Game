@@ -1,5 +1,6 @@
 package me.thatshawt.gameClient;
 
+import javafx.stage.Screen;
 import me.thatshawt.gameClient.gui.DebugLayer;
 import me.thatshawt.gameClient.gui.MainGameScreen;
 import me.thatshawt.gameClient.gui.ScreenRenderer;
@@ -46,6 +47,8 @@ public class GameClient extends JPanel implements Runnable {
     public final AtomicBoolean debug = new AtomicBoolean(false);
     public ChunkMap chunks = new ChunkMap();
 
+    private final DebugLayer debugLayer;
+
     public GameClient(){
         this.addMouseWheelListener(e -> {
             if(!chatting){
@@ -56,42 +59,26 @@ public class GameClient extends JPanel implements Runnable {
         this.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                for(ScreenRenderer renderer : screenRenderers){
-                    if(renderer instanceof UILayer){
-                        ((UILayer)renderer).passMouseClickEvent(e);
-                    }
+                for(int i = screenRenderers.size()-1; i>=0; i--){
+                    ScreenRenderer renderer = screenRenderers.get(i);
+                    if(renderer.onMouseClick(e) && renderer.enabled)break;
                 }
             }
 
             @Override
             public void mousePressed(MouseEvent e) {
-                for(ScreenRenderer renderer : screenRenderers){
-                    if(renderer instanceof UILayer){
-                        ((UILayer)renderer).passMouseDownEvent(e);
-                    }
-                }
-
-                if(e.getButton() == 1){
-                    try {
-                        Point pixel = e.getPoint();
-                        Point tileCoord = pixelToTile(pixel);
-                        chunks.setTile(tileCoord.x, tileCoord.y, new WallTile());
-                    }catch (Exception ignore){}
-                }else{
-                    try {
-                        Point pixel = e.getPoint();
-                        Point tileCoord = pixelToTile(pixel);
-                        chunks.setTile(tileCoord.x, tileCoord.y, new AirTile());
-                    }catch (Exception ignore){}
+//                for(int i=0;i< screenRenderers.size();i++){
+                for(int i = screenRenderers.size()-1; i>=0; i--){
+                    ScreenRenderer renderer = screenRenderers.get(i);
+                    if(renderer.onMouseDown(e) && renderer.enabled)break;
                 }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                for(ScreenRenderer renderer : screenRenderers){
-                    if(renderer instanceof UILayer){
-                        ((UILayer)renderer).passMouseUpEvent(e);
-                    }
+                for(int i = screenRenderers.size()-1; i>=0; i--){
+                    ScreenRenderer renderer = screenRenderers.get(i);
+                    if(renderer.enabled && renderer.onMouseUp(e))break;
                 }
             }
 
@@ -159,6 +146,7 @@ public class GameClient extends JPanel implements Runnable {
                             break;
                         case '3':
                             debug.set(!debug.get());
+                            debugLayer.enabled = debug.get();
                             break;
                         case '+':
                             player.getCamera().addToRenderDistance(-1);
@@ -189,8 +177,11 @@ public class GameClient extends JPanel implements Runnable {
         });
 
         screenRenderers.add(new MainGameScreen(this));
-        screenRenderers.add(new DebugLayer(this));
         screenRenderers.add(new UILayer(this));
+
+        debugLayer = new DebugLayer(this);
+        screenRenderers.add(debugLayer);
+
         //render the smallest zindexes first
         screenRenderers.sort(Comparator.comparingInt(o -> o.zindex));
 
@@ -285,7 +276,6 @@ public class GameClient extends JPanel implements Runnable {
         packetThread.start();
 
         gameControllerThread = new GameControllerThread(this);
-
         gameControllerThread.init();
     }
 
