@@ -1,6 +1,5 @@
 package me.thatshawt.gameClient;
 
-import javafx.stage.Screen;
 import me.thatshawt.gameClient.gui.DebugLayer;
 import me.thatshawt.gameClient.gui.MainGameScreen;
 import me.thatshawt.gameClient.gui.ScreenRenderer;
