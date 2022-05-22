@@ -20,7 +20,7 @@ public class UILayer extends ScreenRenderer{
         super(20);
         this.client = client;
 
-        components.add(new UIButton(10, 10, 200, 100) {
+        components.add(new UIButton(10, 10, 100, 100) {
             @Override
             void onMouseDown(MouseEvent e) {
                 text += "clicked";
@@ -36,6 +36,29 @@ public class UILayer extends ScreenRenderer{
 
             }
         });
+
+        components.add(new UIButton(200, 300, 50, (int) (100f/1.8f)) {
+            @Override
+            void onMouseDown(MouseEvent e) {
+                text += "clicked";
+            }
+
+            @Override
+            void onMouseUp(MouseEvent e) {
+                text = "unclicked";
+            }
+
+            @Override
+            void onMouseClick(MouseEvent e) {
+
+            }
+        });
+
+        UITextArea chatArea = new UITextArea(1,50,100,500,101);
+
+        components.add(chatArea);
+
+        chatArea.text = "ruawdawdawdawdh";
     }
 
     public boolean onMouseClick(MouseEvent e){
@@ -99,7 +122,9 @@ public class UILayer extends ScreenRenderer{
         for(UIComponent component : components){
             if(component.isInRegion(mouseLoc.x, mouseLoc.y))
                 component.hovering = true;
-            Graphics g1 = g.create(component.x,component.y,component.width,component.height);
+            Graphics g1 = g.create(
+                    component.x, component.y,
+                    component.width,component.height);
             component.render(g1);
             g1.dispose();
             component.hovering = false;

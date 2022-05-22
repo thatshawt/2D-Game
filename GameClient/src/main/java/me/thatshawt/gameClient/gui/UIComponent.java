@@ -29,11 +29,18 @@ public abstract class UIComponent {
             && y <= this.y+height && y >= this.y;
     }
 
+    protected void drawStringLeft(Graphics g, Font f, String s){
+        FontMetrics fontMetrics = g.getFontMetrics(f);
+        final int stringHeight = fontMetrics.getHeight();
+        final int stringWidth = fontMetrics.stringWidth(s);
+        g.drawString(s, 0, height/2 + stringHeight/4);
+    }
+
     protected void drawStringCentered(Graphics g, Font f, String s){
         FontMetrics fontMetrics = g.getFontMetrics(f);
         final int stringHeight = fontMetrics.getHeight();
         final int stringWidth = fontMetrics.stringWidth(s);
-        g.drawString(s, x+(width-stringWidth)/2, y+(height-stringHeight)/2 + stringHeight/2);
+        g.drawString(s, (width-stringWidth)/2, height/2 + stringHeight/4);
     }
 
     abstract void onMouseDown(MouseEvent e);

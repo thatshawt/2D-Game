@@ -1,5 +1,7 @@
 package me.thatshawt.gameClient.gui;
 
+import me.thatshawt.gameClient.GameClient;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
@@ -28,6 +30,10 @@ public class UITextArea extends UIComponent{
 
     @Override
     void render(Graphics g) {
+        g.setColor(Color.gray);
+        g.fillRect(0,0,width,height);
 
+        g.setColor(Color.BLACK);
+        drawStringLeft(g, GameClient.UI_FONT, text);
     }
 }

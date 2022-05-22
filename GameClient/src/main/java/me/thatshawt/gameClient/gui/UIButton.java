@@ -14,11 +14,12 @@ public abstract class UIButton extends UIComponent{
 
     @Override
     void render(Graphics g) {
-        Graphics2D g2d = (Graphics2D)g;
+//        Graphics2D g2d = (Graphics2D)g;
 //        g2d.
         Color bg = hovering ? Color.DARK_GRAY : Color.GRAY;
         g.setColor(bg);
-        g.fillRect(x,y,width,height);
+//        g.fillRect(x,y,width,height);
+        g.fillRect(0,0,width,height);
 
         g.setFont(GameClient.UI_FONT);
         g.setColor(Color.BLACK);
