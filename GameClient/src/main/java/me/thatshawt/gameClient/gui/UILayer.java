@@ -20,45 +20,26 @@ public class UILayer extends ScreenRenderer{
         super(20);
         this.client = client;
 
-        components.add(new UIButton(10, 10, 100, 100) {
-            @Override
-            void onMouseDown(MouseEvent e) {
-                text += "clicked";
-            }
+//        components.add(new UIButton(10, 10, 100, 100) {
+//            @Override
+//            void onMouseDown(MouseEvent e) {
+//                text += "clicked";
+//            }
+//
+//            @Override
+//            void onMouseUp(MouseEvent e) {
+//                text = "unclicked";
+//            }
+//
+//            @Override
+//            void onMouseClick(MouseEvent e) {
+//
+//            }
+//        });
 
-            @Override
-            void onMouseUp(MouseEvent e) {
-                text = "unclicked";
-            }
-
-            @Override
-            void onMouseClick(MouseEvent e) {
-
-            }
-        });
-
-        components.add(new UIButton(200, 300, 50, (int) (100f/1.8f)) {
-            @Override
-            void onMouseDown(MouseEvent e) {
-                text += "clicked";
-            }
-
-            @Override
-            void onMouseUp(MouseEvent e) {
-                text = "unclicked";
-            }
-
-            @Override
-            void onMouseClick(MouseEvent e) {
-
-            }
-        });
-
-        UITextArea chatArea = new UITextArea(1,50,100,500,101);
-
-        components.add(chatArea);
-
-        chatArea.text = "ruawdawdawdawdh";
+//        UITextArea chatArea = new UITextArea(1,50,100,500,101);
+//
+//        components.add(chatArea);
     }
 
     public boolean onMouseClick(MouseEvent e){

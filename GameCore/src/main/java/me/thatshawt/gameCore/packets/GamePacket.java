@@ -4,11 +4,11 @@ import me.thatshawt.gameCore.tile.ChunkCoord;
 import me.thatshawt.gameCore.tile.TileChunk;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.util.UUID;
 
 public final class GamePacket {
 
+    //I dont really know why lmao
     public static final int MAX_CHAT_LENGTH = 128;
 
     public static void sendPacket(int packetID, OutputStream output, byte[] data) throws IOException {
@@ -28,10 +28,6 @@ public final class GamePacket {
 
     public static UUID readUUID(DataInputStream input) throws IOException {
         return new UUID(input.readLong(), input.readLong());
-    }
-
-    public static void sendChunk(ChunkCoord coord, TileChunk chunk){
-
     }
 
 }

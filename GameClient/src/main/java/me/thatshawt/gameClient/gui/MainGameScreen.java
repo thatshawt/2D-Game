@@ -70,7 +70,7 @@ public class MainGameScreen extends ScreenRenderer{
             //draw tiles
             g.setColor(Color.WHITE);
             g.setFont(GameClient.CHAR_FONT);
-            final int HALF_RENDER_DISTANCE = (int)((float)camera.getRenderDistance()/2.0f);
+            final int HALF_RENDER_DISTANCE = (int)((float)camera.getRenderDistance()/2.0f)+1;
             for(int i = -HALF_RENDER_DISTANCE; i < camera.getRenderDistance(); i++){
                 for(int j = -HALF_RENDER_DISTANCE; j < camera.getRenderDistance(); j++){
                     Point tileCoord = new Point(

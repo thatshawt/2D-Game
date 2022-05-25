@@ -7,7 +7,7 @@ import java.awt.event.MouseEvent;
 
 public class UITextArea extends UIComponent{
 
-    public String text;
+    public String text = "";
 
     public UITextArea(int zindex, int x, int y, int width, int height) {
         super(zindex, x, y, width, height);

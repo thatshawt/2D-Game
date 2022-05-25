@@ -18,7 +18,7 @@ public class ClientPlayer extends Player{
 
     public ClientPlayer(GameClient gameClient, int x, int y, UUID uuid) {
         super(gameClient.chunks, x, y, uuid);
-        this.camera = new Camera(x,y,10);
+        this.camera = new Camera(x,y,11);
         this.gameClient = gameClient;
     }
 

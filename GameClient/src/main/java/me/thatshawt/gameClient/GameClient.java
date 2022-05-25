@@ -1,9 +1,6 @@
 package me.thatshawt.gameClient;
 
-import me.thatshawt.gameClient.gui.DebugLayer;
-import me.thatshawt.gameClient.gui.MainGameScreen;
-import me.thatshawt.gameClient.gui.ScreenRenderer;
-import me.thatshawt.gameClient.gui.UILayer;
+import me.thatshawt.gameClient.gui.*;
 import me.thatshawt.gameCore.game.Entity;
 import me.thatshawt.gameCore.game.NetworkPlayer;
 import me.thatshawt.gameCore.game.Player;
@@ -14,7 +11,6 @@ import me.thatshawt.gameCore.packets.ServerPacket;
 import me.thatshawt.gameCore.tile.*;
 
 import javax.swing.*;
-//import java.awt.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -31,14 +27,14 @@ public class GameClient extends JPanel implements Runnable {
     public static final int FPS = 24;
     private static final long serialVersionUID = 549255266446745609L;
 
-    private Thread renderThread; //tells the gui to render at a certain FPS
+    private Thread renderThread; //tells the gui to render at a certain FPS (kinda)
     private Thread packetThread; //listens for incoming packets and processes them
     private GameControllerThread gameControllerThread;
 
     protected Socket serverConnection;
     protected ClientPlayer player;
 
-    private List<ScreenRenderer> screenRenderers = new ArrayList<>();
+//    private List<ScreenRenderer> screenRenderers = new ArrayList<>();
 
     public final AtomicReference<Point> lastMouseLocation = new AtomicReference<>(new Point(0,0));
     public boolean chatting = false;
@@ -48,37 +44,42 @@ public class GameClient extends JPanel implements Runnable {
 
     private final DebugLayer debugLayer;
 
+    private Scene activeScene;
+
     public GameClient(){
         this.addMouseWheelListener(e -> {
             if(!chatting){
-                player.getCamera().addToRenderDistance(e.getWheelRotation());
+                player.getCamera().addToRenderDistance(2*e.getWheelRotation());
             }
         });
 
         this.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                for(int i = screenRenderers.size()-1; i>=0; i--){
-                    ScreenRenderer renderer = screenRenderers.get(i);
-                    if(renderer.onMouseClick(e) && renderer.enabled)break;
-                }
+//                for(int i = screenRenderers.size()-1; i>=0; i--){
+//                    ScreenRenderer renderer = screenRenderers.get(i);
+//                    if(renderer.onMouseClick(e) && renderer.enabled)break;
+//                }
+                activeScene.handleMouseClick(e);
             }
 
             @Override
             public void mousePressed(MouseEvent e) {
 //                for(int i=0;i< screenRenderers.size();i++){
-                for(int i = screenRenderers.size()-1; i>=0; i--){
-                    ScreenRenderer renderer = screenRenderers.get(i);
-                    if(renderer.onMouseDown(e) && renderer.enabled)break;
-                }
+//                for(int i = screenRenderers.size()-1; i>=0; i--){
+//                    ScreenRenderer renderer = screenRenderers.get(i);
+//                    if(renderer.onMouseDown(e) && renderer.enabled)break;
+//                }
+                activeScene.handleMouseDown(e);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                for(int i = screenRenderers.size()-1; i>=0; i--){
-                    ScreenRenderer renderer = screenRenderers.get(i);
-                    if(renderer.enabled && renderer.onMouseUp(e))break;
-                }
+//                for(int i = screenRenderers.size()-1; i>=0; i--){
+//                    ScreenRenderer renderer = screenRenderers.get(i);
+//                    if(renderer.enabled && renderer.onMouseUp(e))break;
+//                }
+                activeScene.handleMouseUp(e);
             }
 
             @Override
@@ -175,14 +176,21 @@ public class GameClient extends JPanel implements Runnable {
             }
         });
 
-        screenRenderers.add(new MainGameScreen(this));
-        screenRenderers.add(new UILayer(this));
-
-        debugLayer = new DebugLayer(this);
-        screenRenderers.add(debugLayer);
+//        screenRenderers.add(new MainGameScreen(this));
+//        screenRenderers.add(new UILayer(this));
+//
+//        debugLayer = new DebugLayer(this);
+//        screenRenderers.add(debugLayer);
 
         //render the smallest zindexes first
-        screenRenderers.sort(Comparator.comparingInt(o -> o.zindex));
+//        screenRenderers.sort(Comparator.comparingInt(ScreenRenderer::getZindex));
+
+        activeScene = new Scene();
+        activeScene.addLayer(new MainGameScreen(this));
+        activeScene.addLayer(new UILayer(this));
+
+        debugLayer = new DebugLayer(this);
+        activeScene.addLayer(debugLayer);
 
         renderThread = new Thread(this);
         renderThread.start();
@@ -296,8 +304,8 @@ public class GameClient extends JPanel implements Runnable {
 
     public Point tileToPixel(int tilex, int tiley){
         return new Point(
-                (tilex - player.getCamera().getX() + player.getCamera().getRenderDistance()/2 - 1)*getBoxWidth(),
-                (tiley - player.getCamera().getY() + player.getCamera().getRenderDistance()/2 - 1)*getBoxHeight()
+                (tilex - player.getCamera().getX() + player.getCamera().getRenderDistance()/2 - 0)*getBoxWidth(),
+                (tiley - player.getCamera().getY() + player.getCamera().getRenderDistance()/2 - 0)*getBoxHeight()
         );
     }
 
@@ -305,8 +313,8 @@ public class GameClient extends JPanel implements Runnable {
         final int boxWidth = getBoxWidth();
         final int boxHeight = getBoxHeight();
         final Camera camera =  player.getCamera();
-        int x = screenx/boxWidth  + (camera.getX() - camera.getRenderDistance()/2 + 1);
-        int y = screeny/boxHeight + (camera.getY() - camera.getRenderDistance()/2 + 1);
+        int x = screenx/boxWidth  + (camera.getX() - camera.getRenderDistance()/2 + 0);
+        int y = screeny/boxHeight + (camera.getY() - camera.getRenderDistance()/2 + 0);
         return new Point(x,y);
     }
 
@@ -346,9 +354,7 @@ public class GameClient extends JPanel implements Runnable {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        for(ScreenRenderer renderer : screenRenderers) {
-            if (renderer.enabled) renderer.render(g);
-        }
+        activeScene.render(g);
     }
 
     public void run() {
@@ -377,16 +383,15 @@ public class GameClient extends JPanel implements Runnable {
 
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        String ip;
-        if(debug) ip = "127.0.0.1";
-        else ip = "45.77.121.201";
+        String ipProperty = System.getProperty("ip");
+        String portProperty = System.getProperty("port");
 
-        int port = 25565;
-
-        if(args.length > 0){
-            ip = args[0];
-            port = Integer.parseInt(args[1]);
-        }
+        String ip = ipProperty != null ? ipProperty : "127.0.0.1";
+        int port = portProperty != null ? Integer.parseInt(portProperty) : 25565;
+//        if(args.length > 0){
+//            ip = args[0];
+//            port = Integer.parseInt(args[1]);
+//        }
 
         try {
             gameClient.serverConnection = new Socket(ip, port);
@@ -402,7 +407,8 @@ public class GameClient extends JPanel implements Runnable {
     }
 
     public static void main(String[] args) {
-        testRun(args, true);
+//        System.out.println(System.getProperties().toString().replace(',','\n'));
+        testRun(args, System.getProperty("debug") != null);
     }
 
     public ClientPlayer getPlayer() {
