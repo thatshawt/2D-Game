@@ -68,14 +68,6 @@ public abstract class Entity implements Serializable {
         }
     }
 
-//    /**
-//     * convenience method used <i>before</i> you move using a direction
-//     * @param direction
-//     */
-//    protected void updateChunkLocation(Direction direction){
-//        updateChunkLocation(getX()getX() + direction.xOffset, getY() + direction.yOffset);
-//    }
-
     /**
      * return true if there is no collision, false if there is a collision
      * @param direction the direction of movement

@@ -13,7 +13,7 @@ public abstract class UIButton extends UIComponent{
     }
 
     @Override
-    void render(Graphics g) {
+    public void render(Graphics g) {
         Color bg = hovering ? Color.DARK_GRAY : Color.GRAY;
         g.setColor(bg);
         g.fillRect(0,0,width,height);

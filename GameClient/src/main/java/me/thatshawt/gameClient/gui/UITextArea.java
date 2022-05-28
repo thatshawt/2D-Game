@@ -14,22 +14,22 @@ public class UITextArea extends UIComponent{
     }
 
     @Override
-    void onMouseDown(MouseEvent e) {
+    public void onMouseDown(MouseEvent e) {
 
     }
 
     @Override
-    void onMouseUp(MouseEvent e) {
+    public void onMouseUp(MouseEvent e) {
 
     }
 
     @Override
-    void onMouseClick(MouseEvent e) {
+    public void onMouseClick(MouseEvent e) {
 
     }
 
     @Override
-    void render(Graphics g) {
+    public void render(Graphics g) {
         g.setColor(Color.gray);
         g.fillRect(0,0,width,height);
 

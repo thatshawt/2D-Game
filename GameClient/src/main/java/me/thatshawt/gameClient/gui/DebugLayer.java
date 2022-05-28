@@ -51,6 +51,7 @@ public class DebugLayer extends ScreenRenderer{
                     String.format("camera:%s",camera)
             };
             FontMetrics fontMetrics = g.getFontMetrics(GameClient.UI_FONT);
+            g.setFont(GameClient.UI_FONT);
             final int height = fontMetrics.getHeight();
             for(int i=0; i<debugMsg.length; i++){
                 String s = debugMsg[i];

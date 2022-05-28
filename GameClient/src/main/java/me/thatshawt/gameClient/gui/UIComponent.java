@@ -9,8 +9,12 @@ public abstract class UIComponent {
 
     //this is the zindex within a UILayer
     protected int zindex;
-    protected final int x, y, width, height;
-    protected boolean hovering = false;
+    public int x;
+    public int y;
+    public int width;
+    public int height;
+    public boolean hovering = false;
+    public boolean enabled = true;
     public UIComponent(int zindex, int x, int y, int width, int height) {
         this.x = x;
         this.y = y;
@@ -43,9 +47,9 @@ public abstract class UIComponent {
         g.drawString(s, (width-stringWidth)/2, height/2 + stringHeight/4);
     }
 
-    abstract void onMouseDown(MouseEvent e);
-    abstract void onMouseUp(MouseEvent e);
-    abstract void onMouseClick(MouseEvent e);
+    public abstract void onMouseDown(MouseEvent e);
+    public abstract void onMouseUp(MouseEvent e);
+    public abstract void onMouseClick(MouseEvent e);
 
-    abstract void render(Graphics g);
+    public abstract void render(Graphics g);
 }

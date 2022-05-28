@@ -1,8 +1,9 @@
-package me.thatshawt.gameClient.gui;
+package me.thatshawt.gameClient.gui.mainScene;
 
 import me.thatshawt.gameClient.Camera;
 import me.thatshawt.gameClient.ClientPlayer;
 import me.thatshawt.gameClient.GameClient;
+import me.thatshawt.gameClient.gui.ScreenRenderer;
 import me.thatshawt.gameCore.tile.AirTile;
 import me.thatshawt.gameCore.tile.PlayerTile;
 import me.thatshawt.gameCore.tile.Tile;
@@ -11,7 +12,7 @@ import me.thatshawt.gameCore.tile.WallTile;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
-public class MainGameScreen extends ScreenRenderer{
+public class MainGameScreen extends ScreenRenderer {
 
     public MainGameScreen(GameClient client) {
         super(10);

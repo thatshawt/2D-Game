@@ -1,6 +1,9 @@
 package me.thatshawt.gameClient;
 
 import me.thatshawt.gameClient.gui.*;
+import me.thatshawt.gameClient.gui.mainScene.MainGameScene;
+import me.thatshawt.gameClient.gui.mainScene.MainGameScreen;
+import me.thatshawt.gameClient.gui.mainScene.MainGameUILayer;
 import me.thatshawt.gameCore.game.Entity;
 import me.thatshawt.gameCore.game.NetworkPlayer;
 import me.thatshawt.gameCore.game.Player;
@@ -15,9 +18,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,7 +42,7 @@ public class GameClient extends JPanel implements Runnable {
     public final AtomicBoolean debug = new AtomicBoolean(false);
     public ChunkMap chunks = new ChunkMap();
 
-    private final DebugLayer debugLayer;
+//    private final DebugLayer debugLayer;
 
     private Scene activeScene;
 
@@ -108,24 +108,29 @@ public class GameClient extends JPanel implements Runnable {
 
         this.addKeyListener(new KeyListener() {
             public void keyTyped(KeyEvent e) {
-
+                MainGameScene gameScene = (MainGameScene)activeScene;
                 if(e.getKeyChar() == KeyEvent.VK_ENTER){
                     if(chatting){
                         try {
                             player.sendChat(chatMessage);
                             chatMessage = "";
                             chatting = false;
+//                            gameScene.mainGameUILayer.chatBox.text = "";
+                            gameScene.mainGameUILayer.chatBox.enabled = false;
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
                     }else{
                         chatting = true;
+                        gameScene.mainGameUILayer.chatBox.enabled = true;
                     }
 
                 }else if(chatting &&
-                        (Character.isLetterOrDigit(e.getKeyChar()) || e.getKeyChar() == ' ')) {
+                        (e.getKeyChar() >= 32 && e.getKeyChar() <= 126)
+                        ){
                     chatMessage += e.getKeyChar();
                     chatMessage = chatMessage.substring(0, Math.min(chatMessage.length(),GamePacket.MAX_CHAT_LENGTH));
+//                    gameScene.mainGameUILayer.chatBox.text = chatMessage;
                 }else{
                     switch(e.getKeyChar()){
                         case 'w':
@@ -146,7 +151,8 @@ public class GameClient extends JPanel implements Runnable {
                             break;
                         case '3':
                             debug.set(!debug.get());
-                            debugLayer.enabled = debug.get();
+//                            debugLayer.enabled = debug.get();
+                            ((MainGameScene)activeScene).debugLayer.enabled = debug.get();
                             break;
                         case '+':
                             player.getCamera().addToRenderDistance(-1);
@@ -185,12 +191,14 @@ public class GameClient extends JPanel implements Runnable {
         //render the smallest zindexes first
 //        screenRenderers.sort(Comparator.comparingInt(ScreenRenderer::getZindex));
 
-        activeScene = new Scene();
-        activeScene.addLayer(new MainGameScreen(this));
-        activeScene.addLayer(new UILayer(this));
+//        activeScene = new Scene();
+//        activeScene.addLayer(new MainGameScreen(this));
+//        activeScene.addLayer(new MainGameUILayer(this));
+//
+//        debugLayer = new DebugLayer(this);
+//        activeScene.addLayer(debugLayer);
 
-        debugLayer = new DebugLayer(this);
-        activeScene.addLayer(debugLayer);
+        activeScene = new MainGameScene(this);
 
         renderThread = new Thread(this);
         renderThread.start();
