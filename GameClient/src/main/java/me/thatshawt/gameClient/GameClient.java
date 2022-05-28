@@ -1,6 +1,7 @@
 package me.thatshawt.gameClient;
 
 import me.thatshawt.gameClient.gui.*;
+import me.thatshawt.gameClient.gui.mainMenuScene.MainMenuScene;
 import me.thatshawt.gameClient.gui.mainScene.MainGameScene;
 import me.thatshawt.gameClient.gui.mainScene.MainGameScreen;
 import me.thatshawt.gameClient.gui.mainScene.MainGameUILayer;
@@ -198,7 +199,8 @@ public class GameClient extends JPanel implements Runnable {
 //        debugLayer = new DebugLayer(this);
 //        activeScene.addLayer(debugLayer);
 
-        activeScene = new MainGameScene(this);
+//        activeScene = new MainGameScene(this);
+        activeScene = new MainMenuScene(this);
 
         renderThread = new Thread(this);
         renderThread.start();

@@ -9,32 +9,13 @@ import java.util.List;
 
 public class UILayer extends ScreenRenderer{
 
-    private List<UIComponent> components = new ArrayList<>();
-
-    public final UITextArea chatBox;
+    protected List<UIComponent> components = new ArrayList<>();
 
     protected final GameClient client;
 
     public UILayer(GameClient client, int zindex) {
         super(zindex);
         this.client = client;
-
-        this.chatBox = new UITextArea(1,0, 30, client.getWidth(),30){
-            @Override
-            public void render(Graphics g) {
-                chatBox.x = 0;
-                chatBox.y = client.getHeight()-30;
-                chatBox.width = client.getWidth();
-                chatBox.height = 30;
-                chatBox.text = client.chatMessage;
-
-                super.render(g);
-            }
-        };
-
-        chatBox.enabled = false;
-
-        components.add(chatBox); //whoooooops
     }
 
     @Override

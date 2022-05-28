@@ -5,6 +5,7 @@ import me.thatshawt.gameClient.GameClient;
 import me.thatshawt.gameClient.gui.ScreenRenderer;
 import me.thatshawt.gameClient.gui.UIComponent;
 import me.thatshawt.gameClient.gui.UILayer;
+import me.thatshawt.gameClient.gui.UITextArea;
 import me.thatshawt.gameCore.game.Entity;
 import me.thatshawt.gameCore.game.Player;
 import me.thatshawt.gameCore.tile.TileChunk;
@@ -16,8 +17,27 @@ import java.util.List;
 
 public class MainGameUILayer extends UILayer {
 
+    public final UITextArea chatBox;
+
     public MainGameUILayer(GameClient client) {
         super(client, 20);
+
+        this.chatBox = new UITextArea(1,0, 30, client.getWidth(),30){
+            @Override
+            public void render(Graphics g) {
+                chatBox.x = 0;
+                chatBox.y = client.getHeight()-30;
+                chatBox.width = client.getWidth();
+                chatBox.height = 30;
+                chatBox.text = client.chatMessage;
+
+                super.render(g);
+            }
+        };
+
+        chatBox.enabled = false;
+
+        components.add(chatBox); //whoooooops
     }
 
     @Override
