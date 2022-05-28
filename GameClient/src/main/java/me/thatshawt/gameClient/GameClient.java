@@ -35,17 +35,17 @@ public class GameClient extends JPanel implements Runnable {
     protected Socket serverConnection;
     protected ClientPlayer player;
 
-//    private List<ScreenRenderer> screenRenderers = new ArrayList<>();
-
     public final AtomicReference<Point> lastMouseLocation = new AtomicReference<>(new Point(0,0));
     public boolean chatting = false;
     public String chatMessage = "";
     public final AtomicBoolean debug = new AtomicBoolean(false);
     public ChunkMap chunks = new ChunkMap();
 
+    public SceneManager sceneManager = new SceneManager();
+
 //    private final DebugLayer debugLayer;
 
-    private Scene activeScene;
+//    public Scene activeScene;
 
     public GameClient(){
         this.addMouseWheelListener(e -> {
@@ -57,30 +57,17 @@ public class GameClient extends JPanel implements Runnable {
         this.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-//                for(int i = screenRenderers.size()-1; i>=0; i--){
-//                    ScreenRenderer renderer = screenRenderers.get(i);
-//                    if(renderer.onMouseClick(e) && renderer.enabled)break;
-//                }
-                activeScene.handleMouseClick(e);
+                sceneManager.getActiveScene().handleMouseClick(e);
             }
 
             @Override
             public void mousePressed(MouseEvent e) {
-//                for(int i=0;i< screenRenderers.size();i++){
-//                for(int i = screenRenderers.size()-1; i>=0; i--){
-//                    ScreenRenderer renderer = screenRenderers.get(i);
-//                    if(renderer.onMouseDown(e) && renderer.enabled)break;
-//                }
-                activeScene.handleMouseDown(e);
+                sceneManager.getActiveScene().handleMouseDown(e);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-//                for(int i = screenRenderers.size()-1; i>=0; i--){
-//                    ScreenRenderer renderer = screenRenderers.get(i);
-//                    if(renderer.enabled && renderer.onMouseUp(e))break;
-//                }
-                activeScene.handleMouseUp(e);
+                sceneManager.getActiveScene().handleMouseUp(e);
             }
 
             @Override
@@ -109,59 +96,65 @@ public class GameClient extends JPanel implements Runnable {
 
         this.addKeyListener(new KeyListener() {
             public void keyTyped(KeyEvent e) {
-                MainGameScene gameScene = (MainGameScene)activeScene;
-                if(e.getKeyChar() == KeyEvent.VK_ENTER){
-                    if(chatting){
-                        try {
-                            player.sendChat(chatMessage);
-                            chatMessage = "";
-                            chatting = false;
+                if(sceneManager.getActiveScene() instanceof MainGameScene){
+                    MainGameScene gameScene = (MainGameScene)sceneManager.getActiveScene();
+                    if(e.getKeyChar() == KeyEvent.VK_ENTER){
+                        if(chatting){
+                            try {
+                                player.sendChat(chatMessage);
+                                chatMessage = "";
+                                chatting = false;
 //                            gameScene.mainGameUILayer.chatBox.text = "";
-                            gameScene.mainGameUILayer.chatBox.enabled = false;
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
+                                gameScene.mainGameUILayer.chatBox.enabled = false;
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
+                        }else{
+                            chatting = true;
+                            gameScene.mainGameUILayer.chatBox.enabled = true;
                         }
-                    }else{
-                        chatting = true;
-                        gameScene.mainGameUILayer.chatBox.enabled = true;
-                    }
 
-                }else if(chatting &&
-                        (e.getKeyChar() >= 32 && e.getKeyChar() <= 126)
-                        ){
-                    chatMessage += e.getKeyChar();
-                    chatMessage = chatMessage.substring(0, Math.min(chatMessage.length(),GamePacket.MAX_CHAT_LENGTH));
+                    }else if(chatting &&
+                            (e.getKeyChar() >= 32 && e.getKeyChar() <= 126)
+                    ){
+                        chatMessage += e.getKeyChar();
+                        chatMessage = chatMessage.substring(0, Math.min(chatMessage.length(),GamePacket.MAX_CHAT_LENGTH));
 //                    gameScene.mainGameUILayer.chatBox.text = chatMessage;
-                }else{
-                    switch(e.getKeyChar()){
-                        case 'w':
-                        case 'W':
-                            player.moveUp();
-                            break;
-                        case 's':
-                        case 'S':
-                            player.moveDown();
-                            break;
-                        case 'a':
-                        case 'A':
-                            player.moveLeft();
-                            break;
-                        case 'd':
-                        case 'D':
-                            player.moveRight();
-                            break;
-                        case '3':
-                            debug.set(!debug.get());
+                    }else{
+                        switch(e.getKeyChar()){
+                            case 'w':
+                            case 'W':
+                                player.moveUp();
+                                break;
+                            case 's':
+                            case 'S':
+                                player.moveDown();
+                                break;
+                            case 'a':
+                            case 'A':
+                                player.moveLeft();
+                                break;
+                            case 'd':
+                            case 'D':
+                                player.moveRight();
+                                break;
+                            case '3':
+                                debug.set(!debug.get());
 //                            debugLayer.enabled = debug.get();
-                            ((MainGameScene)activeScene).debugLayer.enabled = debug.get();
-                            break;
-                        case '+':
-                            player.getCamera().addToRenderDistance(-1);
-                            break;
-                        case '-':
-                            player.getCamera().addToRenderDistance(1);
-                            break;
+                                gameScene.debugLayer.enabled = debug.get();
+                                break;
+                            case '+':
+                                player.getCamera().addToRenderDistance(-1);
+                                break;
+                            case '-':
+                                player.getCamera().addToRenderDistance(1);
+                                break;
+                        }
                     }
+                }
+                else if(sceneManager.getActiveScene() instanceof MainMenuScene){
+//                    MainMenuScene mainMenuScene = (MainMenuScene) activeScene;
+//
                 }
 
             }
@@ -200,7 +193,13 @@ public class GameClient extends JPanel implements Runnable {
 //        activeScene.addLayer(debugLayer);
 
 //        activeScene = new MainGameScene(this);
-        activeScene = new MainMenuScene(this);
+//        activeScene = new MainMenuScene(this);
+
+        Scene mainGame = new MainGameScene(this);
+        Scene mainMenu = new MainMenuScene(this, mainGame.uuid);
+        sceneManager.addScene(mainMenu);
+        sceneManager.addScene(mainGame);
+        System.out.println(sceneManager.setActiveScene(mainMenu.uuid));
 
         renderThread = new Thread(this);
         renderThread.start();
@@ -364,7 +363,7 @@ public class GameClient extends JPanel implements Runnable {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        activeScene.render(g);
+        sceneManager.getActiveScene().render(g);
     }
 
     public void run() {

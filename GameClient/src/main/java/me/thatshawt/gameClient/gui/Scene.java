@@ -5,10 +5,20 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 public class Scene {
 
+    public final UUID uuid;
     private List<ScreenRenderer> layers = new ArrayList<>();
+
+    public Scene(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    public Scene(){
+        this(UUID.randomUUID());
+    }
 
     /**
      * internal method to keep the layers sorted by their z-index.

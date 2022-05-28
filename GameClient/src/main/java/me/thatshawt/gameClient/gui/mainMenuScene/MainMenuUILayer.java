@@ -26,6 +26,10 @@ public class MainMenuUILayer extends UILayer {
 
             @Override
             public void onMouseClick(MouseEvent e) {
+                // im assuming that the active scene is the MainMenuScene
+                // which it should be if this method got called
+                MainMenuScene mainMenuScene = (MainMenuScene)client.sceneManager.getActiveScene();
+                client.sceneManager.setActiveScene(mainMenuScene.mainGameUUID);
             }
 
             @Override
@@ -40,7 +44,6 @@ public class MainMenuUILayer extends UILayer {
         };
         playButton.text = "Play";
         components.add(playButton);
-
 
         //TODO: fix this janky stuff right here
         int titleWidth = 150;
