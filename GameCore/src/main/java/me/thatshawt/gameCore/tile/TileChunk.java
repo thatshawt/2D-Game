@@ -25,7 +25,7 @@ public class TileChunk implements Serializable, PacketData {
         }
     }
 
-    public static final int CHUNK_SIZE = 8;
+    public static final int CHUNK_SIZE = 9;
 
     public TileChunk(){
         this(CHUNK_SIZE);

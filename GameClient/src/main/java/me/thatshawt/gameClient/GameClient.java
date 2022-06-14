@@ -144,17 +144,16 @@ public class GameClient extends JPanel implements Runnable {
                                 gameScene.debugLayer.enabled = debug.get();
                                 break;
                             case '+':
-                                player.getCamera().addToRenderDistance(-1);
+                                player.getCamera().addToRenderDistance(-2);
                                 break;
                             case '-':
-                                player.getCamera().addToRenderDistance(1);
+                                player.getCamera().addToRenderDistance(2);
                                 break;
                         }
                     }
-                }
-                else if(sceneManager.getActiveScene() instanceof MainMenuScene){
-//                    MainMenuScene mainMenuScene = (MainMenuScene) activeScene;
-//
+                } else if(sceneManager.getActiveScene() instanceof MainMenuScene){
+                    MainMenuScene mainMenuScene = (MainMenuScene) sceneManager.getActiveScene();
+
                 }
 
             }
@@ -175,25 +174,6 @@ public class GameClient extends JPanel implements Runnable {
 
             }
         });
-
-//        screenRenderers.add(new MainGameScreen(this));
-//        screenRenderers.add(new UILayer(this));
-//
-//        debugLayer = new DebugLayer(this);
-//        screenRenderers.add(debugLayer);
-
-        //render the smallest zindexes first
-//        screenRenderers.sort(Comparator.comparingInt(ScreenRenderer::getZindex));
-
-//        activeScene = new Scene();
-//        activeScene.addLayer(new MainGameScreen(this));
-//        activeScene.addLayer(new MainGameUILayer(this));
-//
-//        debugLayer = new DebugLayer(this);
-//        activeScene.addLayer(debugLayer);
-
-//        activeScene = new MainGameScene(this);
-//        activeScene = new MainMenuScene(this);
 
         Scene mainGame = new MainGameScene(this);
         Scene mainMenu = new MainMenuScene(this, mainGame.uuid);
@@ -220,9 +200,20 @@ public class GameClient extends JPanel implements Runnable {
                     DataInputStream input = new DataInputStream(new BufferedInputStream(server.getInputStream()));
 
                     //packet parsing and handling
+                    ServerPacket previousPacket = null;
+                    int packetCounterLog = 0;
                     while(true) {
                         int packetLength = input.readInt();
                         ServerPacket packet = ServerPacket.fromInt(input.readInt());
+
+
+                        if(previousPacket != null && packet != null && !previousPacket.equals(packet)){
+                            System.out.printf("Received: '%s' x%d\n", previousPacket.name(), packetCounterLog);
+                            packetCounterLog = 0;
+                        }
+
+                        packetCounterLog++;
+                        previousPacket = packet;
 
                         switch(packet){
                             case ENTITY_POSITION: {
@@ -313,8 +304,8 @@ public class GameClient extends JPanel implements Runnable {
 
     public Point tileToPixel(int tilex, int tiley){
         return new Point(
-                (tilex - player.getCamera().getX() + player.getCamera().getRenderDistance()/2 - 0)*getBoxWidth(),
-                (tiley - player.getCamera().getY() + player.getCamera().getRenderDistance()/2 - 0)*getBoxHeight()
+                (tilex - player.getCamera().getX() + player.getCamera().getRenderDistance()/2)*getBoxWidth(),
+                (tiley - player.getCamera().getY() + player.getCamera().getRenderDistance()/2)*getBoxHeight()
         );
     }
 
@@ -322,8 +313,8 @@ public class GameClient extends JPanel implements Runnable {
         final int boxWidth = getBoxWidth();
         final int boxHeight = getBoxHeight();
         final Camera camera =  player.getCamera();
-        int x = screenx/boxWidth  + (camera.getX() - camera.getRenderDistance()/2 + 0);
-        int y = screeny/boxHeight + (camera.getY() - camera.getRenderDistance()/2 + 0);
+        int x = screenx/boxWidth  + camera.getX() - camera.getRenderDistance()/2;
+        int y = screeny/boxHeight + camera.getY() - camera.getRenderDistance()/2;
         return new Point(x,y);
     }
 
